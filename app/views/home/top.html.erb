@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
+  <div class="max-w-3xl w-full space-y-10">
+
+    <!-- メイン機能 -->
+    <div class="bg-white p-8 rounded-lg shadow-md">
+      <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">タスク・メモ管理</h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <%= link_to '/tasks', class: "block bg-blue-500 hover:bg-blue-600 text-white rounded-lg p-6 text-center shadow transition" do %>
+          <div class="text-xl font-semibold">📋 タスク一覧</div>
+          <div class="text-sm mt-1">タスクを管理・コメント・フィルタ</div>
+        <% end %>
+        <%= link_to '/memos', class: "block bg-green-500 hover:bg-green-600 text-white rounded-lg p-6 text-center shadow transition" do %>
+          <div class="text-xl font-semibold">📝 メモ一覧</div>
+          <div class="text-sm mt-1">企業別メモを閲覧・編集</div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- サブ機能 -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold text-gray-700 mb-4">マスタ管理</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <%= link_to '/company_master', class: "block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition" do %>
+          <div class="font-medium text-gray-800">🏢 企業マスタ</div>
+        <% end %>
+        <%= link_to '/category_master', class: "block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition" do %>
+          <div class="font-medium text-gray-800">📂 カテゴリマスタ</div>
+        <% end %>
+        <%= link_to '/status_master', class: "block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition" do %>
+          <div class="font-medium text-gray-800">🚦 ステータスマスタ</div>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>

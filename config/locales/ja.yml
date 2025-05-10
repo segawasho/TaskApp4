@@ -1,0 +1,20 @@
+ja:
+  activerecord:
+    models:
+      memo: メモ
+    attributes:
+      memo:
+        title: タイトル
+        body: 本文
+        memo_date: 日付
+        company: 企業
+  errors:
+    models:
+      memo:
+        attributes:
+          company:
+            required: を入力してください
+  errors:
+    messages:
+      blank: を入力してください
+      too_long: は%{count}文字以内で入力してください
