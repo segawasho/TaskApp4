@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   get '/company_master', to: 'home#company_master'
   get '/category_master', to: 'home#category_master'
   get '/status_master', to: 'home#status_master'
+  get '/company_dashboard', to: 'home#company_dashboard'
+
 
 
   namespace :api do

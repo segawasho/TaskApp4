@@ -9,7 +9,8 @@ class Api::TasksController < ApplicationController
 
 
   def index
-    tasks = Task.includes(:company, :category, :status).all
+    tasks = Task.includes(:company, :category, :status)
+    tasks = tasks.where(company_id: params[:company_id]) if params[:company_id].present?
     render json: tasks.as_json(include: [:company, :category, :status])
   end
   # .includes(...)：N+1問題を防ぐための Eager Load。
