@@ -7,8 +7,6 @@ Rails.application.routes.draw do
   get '/status_master', to: 'home#status_master'
   get '/company_dashboard', to: 'home#company_dashboard'
 
-
-
   namespace :api do
     resources :tasks, only: [:index, :create, :update, :destroy]
     # GET /api/tasks
