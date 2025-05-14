@@ -22,3 +22,12 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+
+💡 lib配下の読み込み設定
+JWT関連の共通処理（lib/json_web_token.rb）を使用するため、
+config/application.rb に以下を追記しています：
+
+config.autoload_paths << Rails.root.join('lib')
+
+これにより JsonWebToken.encode(...) などを各コントローラで利用可能になります。

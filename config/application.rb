@@ -13,6 +13,8 @@ module TaskApp4
 
     config.i18n.default_locale = :ja
 
+    config.autoload_paths << Rails.root.join('lib')
+
 
     # Configuration for the application, engines, and railties goes here.
     #

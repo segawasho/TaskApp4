@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get '/company_dashboard', to: 'home#company_dashboard'
 
   namespace :api do
+    post '/login', to: 'sessions#create'
+    get '/me', to: 'sessions#me'
+    
     resources :tasks, only: [:index, :create, :update, :destroy]
     # GET /api/tasks
     # POST /api/tasks
