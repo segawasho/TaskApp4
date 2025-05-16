@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './Login';
 import TopPage from './TopPage';
+import AdminUserList from './AdminUserList';
+import PasswordSettings from './PasswordSettings';
 import { getCurrentUser } from '../utils/api';
 
 const App = () => {
@@ -23,6 +25,8 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/login/:userId" element={<Login onLogin={setUser} />} />
+        <Route path="/admin/users" element={<AdminUserList />} />
+        <Route path="/settings/password" element={<PasswordSettings />} />
         <Route path="*" element={user ? <TopPage user={user} /> : <p>ログインしてください</p>} />
       </Routes>
     </BrowserRouter>
