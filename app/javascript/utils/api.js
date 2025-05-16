@@ -1,4 +1,3 @@
-// utils/api.js
 export const loginUser = async (id, pin) => {
   try {
     const res = await fetch('/api/login', {
@@ -6,19 +5,23 @@ export const loginUser = async (id, pin) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id, pin }),
+      body: JSON.stringify({
+        login_id: id,  // ← ここを "login_id" に！
+        pin,
+      }),
     });
 
     if (!res.ok) throw new Error('ログイン失敗');
 
     const data = await res.json();
     localStorage.setItem('token', data.token);
-    return data.user; // { id, is_admin }
+    return data.user;
   } catch (err) {
     console.error(err);
     return null;
   }
 };
+
 
 // 認証付きfetch（今ある authFetch もこうなってる想定）
 export const authFetch = async (url, options = {}) => {

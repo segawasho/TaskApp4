@@ -125,6 +125,7 @@ const CompanyDashboard = () => {
             {showMemos && (
               <>
                 <div className="flex flex-wrap gap-4">
+                  <p className="text-xl">検索</p>
                   <input
                     className="border px-2 py-1"
                     placeholder="タイトル"

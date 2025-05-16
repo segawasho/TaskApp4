@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
+// React Router v6にて 下記useParamsが使える。
+import { useParams, useNavigate } from 'react-router-dom';
 import { loginUser } from '../utils/api';
 
 const Login = ({ onLogin }) => {
-  const [id, setId] = useState('');
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    const user = await loginUser(id, pin);
+    const user = await loginUser(userId, pin);
     if (user) {
-      onLogin(user); // 親コンポーネントに通知（user: {id, is_admin}）
+      onLogin(user);
+      navigate('/');
     } else {
       setError('ログインに失敗しました');
     }
@@ -17,14 +21,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div className="p-6 max-w-sm mx-auto text-center">
-      <h2 className="text-xl font-bold mb-4">パスワードを入力</h2>
-      <input
-        type="text"
-        placeholder="ユーザーID"
-        value={id}
-        onChange={(e) => setId(e.target.value)}
-        className="w-full p-2 border rounded mb-2"
-      />
+      <h2 className="text-xl font-bold mb-4">PINを入力してください</h2>
       <input
         type="password"
         placeholder="PIN"

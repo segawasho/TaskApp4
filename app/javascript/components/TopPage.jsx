@@ -1,12 +1,23 @@
 import React from 'react';
+// ログアウト用
+import { useNavigate } from 'react-router-dom';
 
 const TopPage = ({ user }) => {
+
+  // ログアウト用
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate(`/login/${user.login_id}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
       <div className="max-w-3xl w-full space-y-10">
         {/* ようこそ表示 */}
         <div className="text-center text-gray-600 mb-4">
-          ようこそ、ユーザー {user.id} さん
+          ようこそ、{user.name} さん
         </div>
 
         {/* メイン機能 */}
@@ -43,6 +54,18 @@ const TopPage = ({ user }) => {
             </a>
           </div>
         </div>
+
+        {/* ログアウト */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            ログアウト
+          </button>
+        </div>
+
+
       </div>
     </div>
   );

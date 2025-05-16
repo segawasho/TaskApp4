@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './Login';
 import TopPage from './TopPage';
 import { getCurrentUser } from '../utils/api';
@@ -18,7 +19,14 @@ const App = () => {
 
   if (loading) return <p>Loading...</p>; // 初回読み込み防止
 
-  return user ? <TopPage user={user} /> : <Login onLogin={setUser} />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login/:userId" element={<Login onLogin={setUser} />} />
+        <Route path="*" element={user ? <TopPage user={user} /> : <p>ログインしてください</p>} />
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;
