@@ -7,17 +7,17 @@ const FooterNav = () => {
   const navItems = [
     {
       path: '/tasks',
-      label: 'タスク',
+      label: '📋 タスク一覧',
       bgColor: 'bg-blue-500',
     },
     {
       path: '/memos',
-      label: 'メモ',
+      label: '📝 メモ一覧',
       bgColor: 'bg-green-500',
     },
     {
       path: '/',
-      label: 'ホーム',
+      label: '🏠 ホーム',
       bgColor: 'bg-gray-600', // お任せ：落ち着いたグレー系
     },
   ];

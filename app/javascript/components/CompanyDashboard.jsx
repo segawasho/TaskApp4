@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Modal from './Modal';
+import Header from './Header';
 import FooterNav from './FooterNav';
 
 
@@ -56,127 +57,130 @@ const CompanyDashboard = () => {
   };
 
   return (
-    <div className="p-6 space-y-8">
-      <h2 className="text-xl sm:text-2xl font-bold">企業別ダッシュボード（閲覧専用）</h2>
+    <div>
+      <Header />
+      <div className="p-6 space-y-8">
+        <h2 className="text-xl sm:text-2xl font-bold">企業別ダッシュボード（閲覧専用）</h2>
 
-      <select
-        className="border px-3 py-2 mb-4"
-        value={selectedCompanyId}
-        onChange={(e) => {
-          const val = e.target.value;
-          setSelectedCompanyId(val === '' ? '' : Number(val));
-        }}
-      >
-        <option value="">企業を選択してください</option>
-        {companies.map((c) => (
-          <option key={c.id} value={c.id}>{c.name}</option>
-        ))}
-      </select>
+        <select
+          className="border px-3 py-2 mb-4"
+          value={selectedCompanyId}
+          onChange={(e) => {
+            const val = e.target.value;
+            setSelectedCompanyId(val === '' ? '' : Number(val));
+          }}
+        >
+          <option value="">企業を選択してください</option>
+          {companies.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
 
-      {selectedCompanyId && (
-        <>
-          {/* タスクセクション */}
-          <div className="border rounded p-4 bg-gray-50 shadow space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold">タスク一覧</h3>
-              <button className="text-sm text-blue-600 underline" onClick={() => setShowTasks(!showTasks)}>
-                {showTasks ? '非表示' : '表示'}
-              </button>
-            </div>
-            {showTasks && (
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {tasks.map(task => (
-                  <li key={task.id} className="bg-white border rounded-lg p-4 shadow-sm space-y-2 min-h-[240px]">
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className={`px-2 py-1 rounded ${getPriorityClass(task.priority)}`}>
-                        優先度: {task.priority}
-                      </span>
-                      <span className={`px-2 py-1 rounded ${getDueDateClass(task.due_date)}`}>
-                        締切: {task.due_date || '未設定'}
-                      </span>
-                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {task.company?.name || '未設定'}
-                      </span>
-                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {task.category?.name || '未設定'}
-                      </span>
-                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {task.status?.name || '未設定'}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-semibold">{task.title}</h3>
-                    {task.description && (
-                      <p className="text-sm text-gray-600">{task.description}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* メモセクション */}
-          <div className="border rounded p-4 bg-gray-50 shadow space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold">メモ一覧</h3>
-              <button className="text-sm text-blue-600 underline" onClick={() => setShowMemos(!showMemos)}>
-                {showMemos ? '非表示' : '表示'}
-              </button>
-            </div>
-
-            {showMemos && (
-              <>
-                <div className="flex flex-wrap gap-4">
-                  <p className="text-xl">検索</p>
-                  <input
-                    className="border px-2 py-1"
-                    placeholder="タイトル"
-                    value={memoFilter.title}
-                    onChange={(e) => setMemoFilter({ ...memoFilter, title: e.target.value })}
-                  />
-                  <input
-                    className="border px-2 py-1"
-                    placeholder="本文"
-                    value={memoFilter.body}
-                    onChange={(e) => setMemoFilter({ ...memoFilter, body: e.target.value })}
-                  />
-                </div>
-                <ul className="space-y-4">
-                  {filteredMemos.map(memo => (
-                    <li key={memo.id} className="bg-white border rounded p-4 shadow space-y-1 cursor-pointer"
-                        onClick={() => setSelectedMemo(memo)}>
-                      <div className="text-lg font-bold">{memo.title}</div>
-                      <div className="text-sm text-gray-600">{companies.find(c => c.id === memo.company_id)?.name || '不明'} - {memo.memo_date}</div>
+        {selectedCompanyId && (
+          <>
+            {/* タスクセクション */}
+            <div className="border rounded p-4 bg-gray-50 shadow space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold">タスク一覧</h3>
+                <button className="text-sm text-blue-600 underline" onClick={() => setShowTasks(!showTasks)}>
+                  {showTasks ? '非表示' : '表示'}
+                </button>
+              </div>
+              {showTasks && (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {tasks.map(task => (
+                    <li key={task.id} className="bg-white border rounded-lg p-4 shadow-sm space-y-2 min-h-[240px]">
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <span className={`px-2 py-1 rounded ${getPriorityClass(task.priority)}`}>
+                          優先度: {task.priority}
+                        </span>
+                        <span className={`px-2 py-1 rounded ${getDueDateClass(task.due_date)}`}>
+                          締切: {task.due_date || '未設定'}
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {task.company?.name || '未設定'}
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {task.category?.name || '未設定'}
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {task.status?.name || '未設定'}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-semibold">{task.title}</h3>
+                      {task.description && (
+                        <p className="text-sm text-gray-600">{task.description}</p>
+                      )}
                     </li>
                   ))}
                 </ul>
-              </>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* モーダル */}
-          {selectedMemo && (
-            <Modal>
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">{selectedMemo.title}</h3>
-                <p><strong>日付:</strong> {selectedMemo.memo_date}</p>
-                <p><strong>企業:</strong> {companies.find(c => c.id === selectedMemo.company_id)?.name || '不明'}</p>
-                <div dangerouslySetInnerHTML={{ __html: selectedMemo.body }} className="prose" />
-                <div className="flex justify-end mt-4">
-                  <button
-                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                    onClick={() => setSelectedMemo(null)}
-                  >
-                    閉じる
-                  </button>
-                </div>
+            {/* メモセクション */}
+            <div className="border rounded p-4 bg-gray-50 shadow space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold">メモ一覧</h3>
+                <button className="text-sm text-blue-600 underline" onClick={() => setShowMemos(!showMemos)}>
+                  {showMemos ? '非表示' : '表示'}
+                </button>
               </div>
-            </Modal>
-          )}
 
-        </>
-      )}
+              {showMemos && (
+                <>
+                  <div className="flex flex-wrap gap-4">
+                    <p className="text-xl">検索</p>
+                    <input
+                      className="border px-2 py-1"
+                      placeholder="タイトル"
+                      value={memoFilter.title}
+                      onChange={(e) => setMemoFilter({ ...memoFilter, title: e.target.value })}
+                    />
+                    <input
+                      className="border px-2 py-1"
+                      placeholder="本文"
+                      value={memoFilter.body}
+                      onChange={(e) => setMemoFilter({ ...memoFilter, body: e.target.value })}
+                    />
+                  </div>
+                  <ul className="space-y-4">
+                    {filteredMemos.map(memo => (
+                      <li key={memo.id} className="bg-white border rounded p-4 shadow space-y-1 cursor-pointer"
+                          onClick={() => setSelectedMemo(memo)}>
+                        <div className="text-lg font-bold">{memo.title}</div>
+                        <div className="text-sm text-gray-600">{companies.find(c => c.id === memo.company_id)?.name || '不明'} - {memo.memo_date}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
 
-      <FooterNav />
+            {/* モーダル */}
+            {selectedMemo && (
+              <Modal>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">{selectedMemo.title}</h3>
+                  <p><strong>日付:</strong> {selectedMemo.memo_date}</p>
+                  <p><strong>企業:</strong> {companies.find(c => c.id === selectedMemo.company_id)?.name || '不明'}</p>
+                  <div dangerouslySetInnerHTML={{ __html: selectedMemo.body }} className="prose" />
+                  <div className="flex justify-end mt-4">
+                    <button
+                      className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                      onClick={() => setSelectedMemo(null)}
+                    >
+                      閉じる
+                    </button>
+                  </div>
+                </div>
+              </Modal>
+            )}
+
+          </>
+        )}
+
+        <FooterNav />
+      </div>
     </div>
   );
 };

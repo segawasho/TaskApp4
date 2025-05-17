@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CommentSection from '../components/CommentSection';
+import Header from './Header';
 import FooterNav from './FooterNav';
 
 const TaskList = () => {
@@ -196,6 +197,8 @@ const TaskList = () => {
 
   return (
     <div>
+      <Header />
+
       {/* タブ切り替え（固定ヘッダー化） */}
       <div className="sticky top-0 z-10 bg-white w-full px-4 py-2 shadow flex justify-center">
         <button
@@ -533,7 +536,7 @@ const TaskList = () => {
           ))}
         </ul>
       </div>
-      
+
       <FooterNav />
     </div>
   );
