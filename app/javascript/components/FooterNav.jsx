@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const FooterNav = () => {
+const FooterNav = ({ user }) => {
   const location = useLocation();
 
   const navItems = [
@@ -18,7 +18,7 @@ const FooterNav = () => {
     {
       path: '/',
       label: '🏠 ホーム',
-      bgColor: 'bg-gray-600', // お任せ：落ち着いたグレー系
+      bgColor: 'bg-gray-600',
     },
   ];
 

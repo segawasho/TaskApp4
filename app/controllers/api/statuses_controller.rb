@@ -1,12 +1,13 @@
 class Api::StatusesController < ApplicationController
   protect_from_forgery with: :null_session
+  before_action :authorize_request
 
   def index
-    render json: Status.all
+    render json: current_user.statuses
   end
 
   def create
-    status = Status.new(status_params)
+    status = current_user.statuses.build(status_params)
     if status.save
       render json: status, status: :created
     else
@@ -15,7 +16,7 @@ class Api::StatusesController < ApplicationController
   end
 
   def update
-    status = Status.find(params[:id])
+    status = current_user.statuses.find(params[:id])
     if status.update(status_params)
       render json: status
     else
@@ -24,7 +25,7 @@ class Api::StatusesController < ApplicationController
   end
 
   def destroy
-    status = Status.find(params[:id])
+    status = current_user.statuses.find(params[:id])
     status.update(deleted_at: Time.current)
     head :no_content
   end

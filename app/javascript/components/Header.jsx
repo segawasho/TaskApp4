@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/images/logo-tasknote.png';
+import Modal from './Modal';
+import { logoutUser } from '../utils/api';
 
-const Header = () => {
+const Header = ({ user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logoutUser();
+    navigate(`/login/${user.login_id}`);
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white shadow z-50">
@@ -38,9 +47,40 @@ const Header = () => {
             className="block px-4 py-3 text-gray-800 hover:bg-gray-100"
             onClick={() => setMenuOpen(false)}
           >
-            ホーム
+            🏠 ホーム
           </Link>
+          {user?.is_admin && (
+            <Link
+              to="/admin/users"
+              className="block px-4 py-3 text-gray-800 hover:bg-gray-100"
+              onClick={() => setMenuOpen(false)}
+            >
+              👤 ユーザー管理
+            </Link>
+          )}
+          <div
+            className="block px-4 py-3 text-red-600 hover:bg-gray-100 cursor-pointer"
+            onClick={() => {
+              setMenuOpen(false);
+              setShowLogoutModal(true);
+            }}
+          >
+            🔓 ログアウト
+          </div>
         </div>
+      )}
+
+      {/* ログアウト確認モーダル */}
+      {showLogoutModal && (
+        <Modal>
+          <div className="text-center space-y-4">
+            <p className="text-lg font-semibold">ログアウトしますか？</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={handleLogout} className="bg-blue-600 text-white px-4 py-2 rounded">はい</button>
+              <button onClick={() => setShowLogoutModal(false)} className="bg-gray-300 px-4 py-2 rounded">キャンセル</button>
+            </div>
+          </div>
+        </Modal>
       )}
     </header>
   );

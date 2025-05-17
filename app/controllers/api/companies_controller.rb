@@ -1,12 +1,13 @@
 class Api::CompaniesController < ApplicationController
   protect_from_forgery with: :null_session
+  before_action :authorize_request
 
   def index
-    render json: Company.all
+    render json: current_user.companies
   end
 
   def create
-    company = Company.new(company_params)
+    company = current_user.companies.build(company_params)
     if company.save
       render json: company, status: :created
     else
@@ -15,7 +16,7 @@ class Api::CompaniesController < ApplicationController
   end
 
   def update
-    company = Company.find(params[:id])
+    company = current_user.companies.find(params[:id])
     if company.update(company_params)
       render json: company
     else
@@ -24,7 +25,7 @@ class Api::CompaniesController < ApplicationController
   end
 
   def destroy
-    company = Company.find(params[:id])
+    company = current_user.companies.find(params[:id])
     company.update(deleted_at: Time.current)
     head :no_content
   end

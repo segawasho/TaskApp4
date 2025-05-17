@@ -1,12 +1,13 @@
 class Api::CategoriesController < ApplicationController
   protect_from_forgery with: :null_session
+  before_action :authorize_request
 
   def index
-    render json: Category.all
+    render json: current_user.categories
   end
 
   def create
-    category = Category.new(category_params)
+    category = current_user.categories.build(category_params)
     if category.save
       render json: category, status: :created
     else
@@ -15,7 +16,7 @@ class Api::CategoriesController < ApplicationController
   end
 
   def update
-    category = Category.find(params[:id])
+    category = current_user.categories.find(params[:id])
     if category.update(category_params)
       render json: category
     else
@@ -24,7 +25,7 @@ class Api::CategoriesController < ApplicationController
   end
 
   def destroy
-    category = Category.find(params[:id])
+    category = current_user.categories.find(params[:id])
     category.update(deleted_at: Time.current)
     head :no_content
   end

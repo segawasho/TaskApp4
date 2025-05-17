@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 // ログアウト用
 import { useNavigate, Link } from 'react-router-dom';
 import { logoutUser } from '../utils/api';
 import Header from './Header';
 import FooterNav from './FooterNav';
+import Modal from './Modal';
 
 
 const TopPage = ({ user }) => {
 
   // ログアウト用
   const navigate = useNavigate();
+  // モーダル用
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     logoutUser();
@@ -18,7 +21,7 @@ const TopPage = ({ user }) => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
 
       <div className="min-h-screen bg-gray-100 pt-20 flex items-center justify-center py-12 px-4">
 
@@ -46,22 +49,20 @@ const TopPage = ({ user }) => {
           </div>
 
           {/* サブ機能 */}
-          {user?.is_admin && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold text-center text-gray-700 mb-4">マスタ管理</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Link to="/company_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
-                  <div className="font-medium text-gray-800">🏢 企業マスタ</div>
-                </Link>
-                <Link to="/category_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
-                  <div className="font-medium text-gray-800">📂 カテゴリマスタ</div>
-                </Link>
-                <Link to="/status_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
-                  <div className="font-medium text-gray-800">🚦 ステータスマスタ</div>
-                </Link>
-              </div>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold text-center text-gray-700 mb-4">マスタ管理</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Link to="/company_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
+                <div className="font-medium text-gray-800">🏢 企業マスタ</div>
+              </Link>
+              <Link to="/category_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
+                <div className="font-medium text-gray-800">📂 カテゴリマスタ</div>
+              </Link>
+              <Link to="/status_master" className="block border border-gray-300 rounded-md p-4 text-center hover:bg-gray-100 transition">
+                <div className="font-medium text-gray-800">🚦 ステータスマスタ</div>
+              </Link>
             </div>
-          )}
+          </div>
 
           {/* パスワード変更 */}
           <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -71,14 +72,14 @@ const TopPage = ({ user }) => {
               <Link to="/settings/password"
                 className="inline-block px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
               >
-                パスワード変更
+                🔑 パスワード変更
               </Link>
 
               {user?.is_admin && (
                 <Link to="/admin/users"
                   className="inline-block ml-4 px-4 py-2 bg-yellow-200 rounded hover:bg-yellow-300"
                 >
-                  ユーザー管理
+                  👥 ユーザー管理
                 </Link>
               )}
             </div>
@@ -96,21 +97,45 @@ const TopPage = ({ user }) => {
           {/* ログアウト */}
           {user?.name && (
             <div className="flex justify-end mb-4">
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                ログアウト
-              </button>
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              ログアウト
+            </button>
             </div>
           )}
         </div>
 
-        <FooterNav />
+        <FooterNav user={user} />
 
       </div>
-      
+
+      // モーダル
+      {showLogoutModal && (
+        <Modal>
+          <div className="text-center space-y-4">
+            <p className="text-lg font-semibold">ログアウトしますか？</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleLogout}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                はい
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
     </div>
+
   );
 };
 

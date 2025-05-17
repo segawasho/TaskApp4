@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../stylesheets/tailwind.css';
+import { authFetch } from '../utils/api';
 import MemoEditor from './MemoEditor'
 import Modal from './Modal';
 import Header from './Header';
@@ -7,7 +7,7 @@ import FooterNav from './FooterNav';
 
 
 
-const MemoSection = () => {
+const MemoSection = (　{user}　) => {
   const [memos, setMemos] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [showNewForm, setShowNewForm] = useState(false);
@@ -23,7 +23,7 @@ const MemoSection = () => {
 
   // 企業マスタ取得
   useEffect(() => {
-    fetch('/api/companies')
+    authFetch('/api/companies')
       .then(res => res.json())
       .then(data => setCompanies(data.filter(c => c.deleted_at === null)));
   }, []);
@@ -38,7 +38,7 @@ const MemoSection = () => {
       params.append('archived', filters.archived ? 'true' : 'false');
     }
 
-    fetch(`/api/memos?${params.toString()}`)
+    authFetch(`/api/memos?${params.toString()}`)
       .then(res => res.json())
       .then(data => setMemos(data));
   }, [filters]);
@@ -48,7 +48,7 @@ const MemoSection = () => {
   const handleCreate = () => {
     setCreateError(''); // エラー初期化
 
-    fetch('/api/memos', {
+    authFetch('/api/memos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ memo: { ...newMemo, body: newMemoBody } }),
@@ -76,7 +76,7 @@ const MemoSection = () => {
 
   // メモ編集保存（PATCH）
   const handleUpdate = () => {
-    fetch(`/api/memos/${selectedMemo.id}`, {
+    authFetch(`/api/memos/${selectedMemo.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ memo: editMemo })
@@ -91,7 +91,7 @@ const MemoSection = () => {
 
   // メモアーカイブ処理
   const handleArchive = (id) => {
-    fetch(`/api/memos/${id}`, {
+    authFetch(`/api/memos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ memo: { archived: true } }),
@@ -105,7 +105,7 @@ const MemoSection = () => {
 
   // メモアーカイブ復元処理
   const handleUnarchive = (id) => {
-    fetch(`/api/memos/${id}`, {
+    authFetch(`/api/memos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ memo: { archived: false } }),
@@ -120,7 +120,7 @@ const MemoSection = () => {
 
   // メモ削除処理
   const handleDelete = (id) => {
-    fetch(`/api/memos/${id}`, {
+    authFetch(`/api/memos/${id}`, {
       method: 'DELETE',
     })
       .then(() => {
@@ -133,7 +133,7 @@ const MemoSection = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
       <div className="p-4 space-y-6">
         <h2 className="text-xl font-semibold">メモ一覧</h2>
 
@@ -370,7 +370,7 @@ const MemoSection = () => {
           </Modal>
         )}
 
-        <FooterNav />
+        <FooterNav user={user} />
 
       </div>
     </div>

@@ -3,33 +3,25 @@ import { updatePassword } from '../utils/api';
 import Header from './Header';
 import FooterNav from './FooterNav';
 import PinInputPad from './PinInputPad';
+import Toast from './Toast';
 
-const PasswordSettings = () => {
+const PasswordSettings = ( {user} ) => {
   const [newPassword, setNewPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const handleSubmit = async () => {
     try {
       await updatePassword(newPassword);
-      setMessage('パスワードを変更しました');
-      setIsSuccess(true); // 成功時はtrueに
+      setToast({ message: 'パスワードを変更しました', type: 'success' });
       setNewPassword('');
-
-      // 3秒後にメッセージを消す（成功時のみ）
-      setTimeout(() => {
-        setMessage('');
-        setIsSuccess(false);
-      }, 3000);
     } catch (err) {
-      setMessage('パスワードの変更に失敗しました');
-      setIsSuccess(false);
+      setToast({ message: 'パスワードの変更に失敗しました', type: 'error' });
     }
   };
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
       <div className="p-6 max-w-md mx-auto">
         <h2 className="text-2xl font-bold mb-4">パスワード変更</h2>
         <input
@@ -51,14 +43,17 @@ const PasswordSettings = () => {
         {/* ✅ PINテンキーUI */}
         <PinInputPad value={newPassword} setValue={setNewPassword} onSubmit={handleSubmit} />
 
-        {/* ✅ メッセージ表示（成功なら緑、失敗なら赤） */}
-        {message && (
-          <p className={`mt-4 text-center text-sm font-medium ${isSuccess ? 'text-green-600' : 'text-red-500'}`}>
-            {message}
-          </p>
-        )}
-        <FooterNav />
+        <FooterNav user={user} />
       </div>
+
+      {/* ✅ トースト表示 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 
-const CommentSection = ({ taskId }) => {
+const CommentSection = ({ taskId,user }) => {
   const [comments, setComments] = useState([]);
   const [newCommentContent, setNewCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedCommentContent, setEditedCommentContent] = useState('');
 
   useEffect(() => {
-    fetch(`/api/tasks/${taskId}/progress_comments`)
-      .then(res => res.json())
-      .then(data => setComments(data));
+    const fetchComments = async () => {
+      try {
+        const res = await authFetch(`/api/tasks/${taskId}/progress_comments`);
+        const data = await res.json();
+        setComments(data);
+      } catch (err) {
+        console.error('コメントの取得に失敗', err);
+      }
+    };
+    fetchComments();
   }, [taskId]);
 
   const handleAddComment = () => {
-    fetch(`/api/progress_comments`, {
+    authFetch(`/api/progress_comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -34,7 +42,7 @@ const CommentSection = ({ taskId }) => {
   };
 
   const handleUpdateComment = (commentId) => {
-    fetch(`/api/progress_comments/${commentId}`, {
+    authFetch(`/api/progress_comments/${commentId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: editedCommentContent })
@@ -50,7 +58,7 @@ const CommentSection = ({ taskId }) => {
   };
 
   const handleDeleteComment = (commentId) => {
-    fetch(`/api/progress_comments/${commentId}`, {
+    authFetch(`/api/progress_comments/${commentId}`, {
       method: 'DELETE' })
       .then(() => {
         setComments(prev => prev.filter(c => c.id !== commentId));

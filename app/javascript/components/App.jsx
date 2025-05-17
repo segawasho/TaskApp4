@@ -34,14 +34,14 @@ const App = () => {
       {user ? (
         <>
           <Route path="/" element={<TopPage user={user} />} />
-          <Route path="/admin/users" element={<AdminUserList />} />
-          <Route path="/settings/password" element={<PasswordSettings />} />
-          <Route path="/tasks" element={<TaskList />} />
-          <Route path="/memos" element={<MemoList />} />
-          <Route path="/company_dashboard" element={<CompanyDashboard />} />
-          <Route path="/company_master" element={<CompanyMaster />} />
-          <Route path="/category_master" element={<CategoryMaster />} />
-          <Route path="/status_master" element={<StatusMaster />} />
+          <Route path="/admin/users" element={<AdminUserList user={user} />} />
+          <Route path="/settings/password" element={<PasswordSettings user={user} />} />
+          <Route path="/tasks" element={<TaskList user={user} />} />
+          <Route path="/memos" element={<MemoList user={user} />} />
+          <Route path="/company_dashboard" element={<CompanyDashboard user={user} />} />
+          <Route path="/company_master" element={<CompanyMaster user={user} />} />
+          <Route path="/category_master" element={<CategoryMaster user={user} />} />
+          <Route path="/status_master" element={<StatusMaster user={user} />} />
           <Route path="*" element={<TopPage user={user} />} />
         </>
       ) : (

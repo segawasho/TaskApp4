@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 import Header from './Header';
 import FooterNav from './FooterNav';
 
 
-const CategoryMaster = () => {
+const CategoryMaster = ({ user }) => {
   const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategoryId, setEditingCategoryId] = useState(null);
@@ -14,7 +15,7 @@ const CategoryMaster = () => {
   }, []);
 
   const fetchCategories = () => {
-    fetch('/api/categories')
+    authFetch('/api/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data);
@@ -23,7 +24,7 @@ const CategoryMaster = () => {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    fetch('/api/categories', {
+    authFetch('/api/categories', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +45,7 @@ const CategoryMaster = () => {
   };
 
   const handleUpdate = (id) => {
-    fetch(`/api/categories/${id}`, {
+    authFetch(`/api/categories/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ const CategoryMaster = () => {
   };
 
   const handleDelete = (id) => {
-    fetch(`/api/categories/${id}`, {
+    authFetch(`/api/categories/${id}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-Token': getCsrfToken()
@@ -71,7 +72,7 @@ const CategoryMaster = () => {
   };
 
   const handleRestore = (id) => {
-    fetch(`/api/categories/${id}`, {
+    authFetch(`/api/categories/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +94,7 @@ const CategoryMaster = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">カテゴリマスタ管理</h2>
 
@@ -155,7 +156,7 @@ const CategoryMaster = () => {
           ))}
         </ul>
 
-        <FooterNav />
+        <FooterNav user={user} />
       </div>
     </div>
   );

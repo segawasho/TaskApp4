@@ -6,10 +6,11 @@ class Api::TasksController < ApplicationController
   # 通常の画面操作（フォーム送信とか）はprotect_from_forgeryが守ってくれる
   # APIだけ特別に CSRFチェックを無効にしてあげる感じ
   # セキュリティ的にも、API用なら大丈夫！（これが普通の設定）
+  before_action :authorize_request
 
 
   def index
-    tasks = Task.includes(:company, :category, :status)
+    tasks = current_user.tasks.includes(:company, :category, :status)
     tasks = tasks.where(company_id: params[:company_id]) if params[:company_id].present?
     render json: tasks.as_json(include: [:company, :category, :status])
   end
@@ -17,7 +18,7 @@ class Api::TasksController < ApplicationController
   # .as_json(include: [...])：各関連オブジェクト（company, category, status）の中身を含めて JSON 化。
 
   def create
-    task = Task.new(task_params)
+    task = current_user.tasks.build(task_params)
     if task.save
       render json: task, status: :created
     else
@@ -26,7 +27,7 @@ class Api::TasksController < ApplicationController
   end
 
   def update
-    task = Task.find(params[:id])
+    task = current_user.tasks.find(params[:id])
     if task.update(task_params)
       render json: task
     else
@@ -36,7 +37,7 @@ class Api::TasksController < ApplicationController
 
 
   def destroy
-    task = Task.find(params[:id])
+    task = current_user.tasks.find(params[:id])
     task.destroy
     head :no_content
   end

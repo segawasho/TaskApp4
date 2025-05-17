@@ -15,13 +15,15 @@ Rails.application.routes.draw do
     resources :users, only: [:index, :update]
     patch '/password', to: 'users#update_password'
 
-    resources :tasks, only: [:index, :create, :update, :destroy]
-    get 'tasks/:task_id/progress_comments', to: 'progress_comments#index'
+    resources :tasks, only: [:index, :create, :update, :destroy] do
+      resources :progress_comments, only: [:index], shallow: true
+    end
+    resources :progress_comments, only: [:create, :update, :destroy]
+
+    resources :memos, only: [:index, :create, :update, :destroy]
 
     resources :companies, only: [:index, :create, :update, :destroy]
     resources :categories, only: [:index, :create, :update, :destroy]
     resources :statuses, only: [:index, :create, :update, :destroy]
-    resources :memos, only: [:index, :create, :update, :destroy]
-    resources :progress_comments, only: [:create, :update, :destroy]
   end
 end

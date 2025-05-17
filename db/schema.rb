@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_17_125359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -27,7 +29,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
     t.string "company_code", null: false
+    t.bigint "user_id", null: false
     t.index ["company_code"], name: "index_companies_on_company_code", unique: true
+    t.index ["user_id"], name: "index_companies_on_user_id"
   end
 
   create_table "memos", force: :cascade do |t|
@@ -38,7 +42,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.boolean "archived", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["company_id"], name: "index_memos_on_company_id"
+    t.index ["user_id"], name: "index_memos_on_user_id"
   end
 
   create_table "progress_comments", force: :cascade do |t|
@@ -46,7 +52,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.text "content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["task_id"], name: "index_progress_comments_on_task_id"
+    t.index ["user_id"], name: "index_progress_comments_on_user_id"
   end
 
   create_table "statuses", force: :cascade do |t|
@@ -54,6 +62,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_statuses_on_user_id"
   end
 
   create_table "tasks", force: :cascade do |t|
@@ -67,6 +77,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "is_done"
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_tasks_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -79,6 +91,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_11_121314) do
     t.index ["login_id"], name: "index_users_on_login_id", unique: true
   end
 
+  add_foreign_key "categories", "users"
+  add_foreign_key "companies", "users"
   add_foreign_key "memos", "companies"
+  add_foreign_key "memos", "users"
   add_foreign_key "progress_comments", "tasks"
+  add_foreign_key "progress_comments", "users"
+  add_foreign_key "statuses", "users"
+  add_foreign_key "tasks", "users"
 end

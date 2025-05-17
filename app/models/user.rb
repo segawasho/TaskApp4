@@ -5,6 +5,13 @@ class User < ApplicationRecord
   validates :name, presence: true, length: { maximum: 20 }
   validates :password, presence: true, length: { minimum: 4 }, if: :password_required?
 
+  has_many :tasks
+  has_many :progress_comments
+  has_many :memos
+  has_many :companies
+  has_many :categories
+  has_many :statuses
+
   private
 
   def password_required?

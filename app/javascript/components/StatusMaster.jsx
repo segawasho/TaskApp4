@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 import Header from './Header';
 import FooterNav from './FooterNav';
 
-const StatusMaster = () => {
+const StatusMaster = ({ user }) => {
   const [statuses, setStatuses] = useState([]);
   const [newStatusName, setNewStatusName] = useState('');
   const [editingStatusId, setEditingStatusId] = useState(null);
@@ -13,7 +14,7 @@ const StatusMaster = () => {
   }, []);
 
   const fetchStatuses = () => {
-    fetch('/api/statuses')
+    authFetch('/api/statuses')
       .then(res => res.json())
       .then(data => {
         setStatuses(data);
@@ -22,7 +23,7 @@ const StatusMaster = () => {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    fetch('/api/statuses', {
+    authFetch('/api/statuses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,7 +44,7 @@ const StatusMaster = () => {
   };
 
   const handleUpdate = (id) => {
-    fetch(`/api/statuses/${id}`, {
+    authFetch(`/api/statuses/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ const StatusMaster = () => {
   };
 
   const handleDelete = (id) => {
-    fetch(`/api/statuses/${id}`, {
+    authFetch(`/api/statuses/${id}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-Token': getCsrfToken()
@@ -70,7 +71,7 @@ const StatusMaster = () => {
   };
 
   const handleRestore = (id) => {
-    fetch(`/api/statuses/${id}`, {
+    authFetch(`/api/statuses/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ const StatusMaster = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
 
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">ステータスマスタ管理</h2>
@@ -153,7 +154,7 @@ const StatusMaster = () => {
           ))}
         </ul>
 
-        <FooterNav />
+        <FooterNav user={user} />
       </div>
     </div>
   );

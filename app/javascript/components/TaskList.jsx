@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 import CommentSection from '../components/CommentSection';
 import Header from './Header';
 import FooterNav from './FooterNav';
 
-const TaskList = () => {
+const TaskList = ({user}) => {
   const [tasks, setTasks] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -39,16 +40,19 @@ const TaskList = () => {
   }, []);
 
   const fetchTasks = () => {
-    fetch('/api/tasks')
+    authFetch('/api/tasks')
       .then(response => response.json())
-      .then(data => setTasks(data))
+      .then(data => {
+        // 自分のタスクのみ
+        setTasks(data.filter(task => task.user_id === user.id));
+      })
       .catch(error => console.error('Error fetching tasks:', error));
   };
 
   const handleCreateTask = (e) => {
     e.preventDefault();
 
-    fetch('/api/tasks', {
+    authFetch('/api/tasks', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +82,7 @@ const TaskList = () => {
   };
 
   const handleUpdate = (id) => {
-    fetch(`/api/tasks/${id}`, {
+    authFetch(`/api/tasks/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +112,7 @@ const TaskList = () => {
   };
 
   const handleDelete = (id) => {
-    fetch(`/api/tasks/${id}`, {
+    authFetch(`/api/tasks/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -124,25 +128,26 @@ const TaskList = () => {
   const fetchMasterData = async () => {
     try {
       const [companiesRes, categoriesRes, statusesRes] = await Promise.all([
-        fetch('/api/companies'),
-        fetch('/api/categories'),
-        fetch('/api/statuses'),
+        authFetch('/api/companies'),
+        authFetch('/api/categories'),
+        authFetch('/api/statuses'),
       ]);
       const [companies, categories, statuses] = await Promise.all([
         companiesRes.json(),
         categoriesRes.json(),
         statusesRes.json(),
       ]);
-      setCompanies(companies.filter(c => !c.deleted_at));
-      setCategories(categories.filter(c => !c.deleted_at));
-      setStatuses(statuses.filter(s => !s.deleted_at));
+      // 自分の企業、カテゴリ、ステータスのみ
+      setCompanies(companies.filter(c => !c.deleted_at && c.user_id === user.id));
+      setCategories(categories.filter(c => !c.deleted_at && c.user_id === user.id));
+      setStatuses(statuses.filter(s => !s.deleted_at && s.user_id === user.id));
     } catch (error) {
       console.error('マスタデータの取得に失敗しました:', error);
     }
   };
 
   const toggleDone = (task) => {
-    fetch(`/api/tasks/${task.id}`, {
+    authFetch(`/api/tasks/${task.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -197,7 +202,7 @@ const TaskList = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
 
       {/* タブ切り替え（固定ヘッダー化） */}
       <div className="sticky top-0 z-10 bg-white w-full px-4 py-2 shadow flex justify-center">
@@ -526,8 +531,10 @@ const TaskList = () => {
                         削除
                       </button>
                     </div>
+
+
                     <div className="mt-2 max-h-[100px] overflow-y-auto border-t pt-2">
-                      <CommentSection taskId={task.id} />
+                      <CommentSection taskId={task.id} user={user} />
                     </div>
 
                   </>
@@ -537,7 +544,7 @@ const TaskList = () => {
         </ul>
       </div>
 
-      <FooterNav />
+      <FooterNav user={user} />
     </div>
   );
 };

@@ -1,13 +1,15 @@
 class Api::ProgressCommentsController < ApplicationController
     protect_from_forgery with: :null_session
+    before_action :authorize_request
+
 
     def index
-      comments = ProgressComment.where(task_id: params[:task_id]).order(created_at: :desc)
+      comments = current_user.progress_comments.where(task_id: params[:task_id]).order(created_at: :desc)
       render json: comments
     end
 
     def create
-      comment = ProgressComment.new(progress_comment_params)
+      comment = current_user.progress_comments.build(progress_comment_params)
       if comment.save
         render json: comment, status: :created
       else
@@ -16,7 +18,7 @@ class Api::ProgressCommentsController < ApplicationController
     end
 
     def update
-      comment = ProgressComment.find(params[:id])
+      comment = current_user.progress_comments.find(params[:id])
       if comment.update(progress_comment_params)
         render json: comment
       else
@@ -26,7 +28,7 @@ class Api::ProgressCommentsController < ApplicationController
 
 
     def destroy
-      comment = ProgressComment.find(params[:id])
+      comment = current_user.progress_comments.find(params[:id])
       comment.destroy
       head :no_content
     end

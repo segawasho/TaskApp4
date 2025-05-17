@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 import Modal from './Modal';
 import Header from './Header';
 import FooterNav from './FooterNav';
 
 
-const CompanyDashboard = () => {
+const CompanyDashboard = ( {user} ) => {
   const [companies, setCompanies] = useState([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [tasks, setTasks] = useState([]);
@@ -15,18 +16,18 @@ const CompanyDashboard = () => {
   const [showMemos, setShowMemos] = useState(true);
 
   useEffect(() => {
-    fetch('/api/companies')
+    authFetch('/api/companies')
       .then(res => res.json())
       .then(data => setCompanies(data.filter(c => !c.deleted_at)));
   }, []);
 
   useEffect(() => {
     if (!selectedCompanyId) return;
-    fetch(`/api/tasks?company_id=${selectedCompanyId}`)
+    authFetch(`/api/tasks?company_id=${selectedCompanyId}`)
       .then(res => res.json())
       .then(setTasks);
 
-    fetch(`/api/memos?company_id=${selectedCompanyId}`)
+    authFetch(`/api/memos?company_id=${selectedCompanyId}`)
       .then(res => res.json())
       .then(setMemos);
   }, [selectedCompanyId]);
@@ -58,7 +59,7 @@ const CompanyDashboard = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
       <div className="p-6 space-y-8">
         <h2 className="text-xl sm:text-2xl font-bold">企業別ダッシュボード（閲覧専用）</h2>
 
@@ -179,7 +180,7 @@ const CompanyDashboard = () => {
           </>
         )}
 
-        <FooterNav />
+        <FooterNav user={user} />
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 class Api::MemosController < ApplicationController
   protect_from_forgery with: :null_session
+  before_action :authorize_request
 
   def index
-    memos = Memo.all
+    memos = current_user.memos
     memos = memos.where(company_id: params[:company_id]) if params[:company_id].present?
     memos = memos.where("title LIKE ?", "%#{params[:title]}%") if params[:title].present?
     memos = memos.where("body LIKE ?", "%#{params[:body]}%") if params[:body].present?
@@ -15,7 +16,7 @@ class Api::MemosController < ApplicationController
   end
 
   def create
-    memo = Memo.new(memo_params)
+    memo = current_user.memos.build(memo_params)
     if memo.save
       render json: memo, status: :created
     else
@@ -24,7 +25,7 @@ class Api::MemosController < ApplicationController
   end
 
   def update
-    memo = Memo.find(params[:id])
+    memo = current_user.memos.find(params[:id])
     if memo.update(memo_params)
       render json: memo
     else
@@ -33,7 +34,7 @@ class Api::MemosController < ApplicationController
   end
 
   def destroy
-    memo = Memo.find(params[:id])
+    memo = current_user.memos.find(params[:id])
     memo.update(archived: true)
     head :no_content
   end

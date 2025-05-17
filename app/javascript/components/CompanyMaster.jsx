@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { authFetch } from '../utils/api';
 import Header from './Header';
 import FooterNav from './FooterNav';
 
-const CompanyMaster = () => {
+const CompanyMaster = ({ user }) => {
   const [companies, setCompanies] = useState([]);
   const [newCompanyName, setNewCompanyName] = useState('');
   const [newCompanyCode, setNewCompanyCode] = useState('');
@@ -15,7 +16,7 @@ const CompanyMaster = () => {
   }, []);
 
   const fetchCompanies = () => {
-    fetch('/api/companies')
+    authFetch('/api/companies')
       .then(res => res.json())
       .then(data => {
         setCompanies(data);
@@ -24,7 +25,7 @@ const CompanyMaster = () => {
 
   const handleCreate = (e) => {
     e.preventDefault();
-    fetch('/api/companies', {
+    authFetch('/api/companies', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,6 +41,7 @@ const CompanyMaster = () => {
       .then(res => res.json())
       .then(() => {
         setNewCompanyName('');
+        setNewCompanyCode('');
         fetchCompanies();
       });
   };
@@ -51,7 +53,7 @@ const CompanyMaster = () => {
   };
 
   const handleUpdate = (id) => {
-    fetch(`/api/companies/${id}`, {
+    authFetch(`/api/companies/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +74,7 @@ const CompanyMaster = () => {
   };
 
   const handleDelete = (id) => {
-    fetch(`/api/companies/${id}`, {
+    authFetch(`/api/companies/${id}`, {
       method: 'DELETE',
       headers: {
         'X-CSRF-Token': getCsrfToken()
@@ -83,7 +85,7 @@ const CompanyMaster = () => {
   };
 
   const handleRestore = (id) => {
-    fetch(`/api/companies/${id}`, {
+    authFetch(`/api/companies/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -105,7 +107,7 @@ const CompanyMaster = () => {
 
   return (
     <div>
-      <Header />
+      <Header user={user} />
 
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">企業マスタ管理</h2>
@@ -210,7 +212,7 @@ const CompanyMaster = () => {
           ))}
         </ul>
 
-        <FooterNav />
+        <FooterNav user={user} />
       </div>
     </div>
   );
