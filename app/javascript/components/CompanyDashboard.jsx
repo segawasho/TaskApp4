@@ -1,6 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import Modal from './Modal';
+import FooterNav from './FooterNav';
+
 
 const CompanyDashboard = () => {
   const [companies, setCompanies] = useState([]);
@@ -175,12 +176,7 @@ const CompanyDashboard = () => {
         </>
       )}
 
-      {/* トップページへ */}
-      <div className="mt-10 text-center">
-        <a href="/" className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          トップページへ戻る
-        </a>
-      </div>
+      <FooterNav />
     </div>
   );
 };

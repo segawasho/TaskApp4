@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import { updatePassword } from '../utils/api';
+import FooterNav from './FooterNav';
+import PinInputPad from './PinInputPad';
 
 const PasswordSettings = () => {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async () => {
     try {
       await updatePassword(newPassword);
       setMessage('パスワードを変更しました');
+      setIsSuccess(true); // 成功時はtrueに
       setNewPassword('');
+
+      // 3秒後にメッセージを消す（成功時のみ）
+      setTimeout(() => {
+        setMessage('');
+        setIsSuccess(false);
+      }, 3000);
     } catch (err) {
       setMessage('パスワードの変更に失敗しました');
+      setIsSuccess(false);
     }
   };
 
@@ -34,13 +45,16 @@ const PasswordSettings = () => {
         }}
       />
 
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        変更する
-      </button>
-      {message && <p className="mt-4 text-center">{message}</p>}
+      {/* ✅ PINテンキーUI */}
+      <PinInputPad value={newPassword} setValue={setNewPassword} onSubmit={handleSubmit} />
+
+      {/* ✅ メッセージ表示（成功なら緑、失敗なら赤） */}
+      {message && (
+        <p className={`mt-4 text-center text-sm font-medium ${isSuccess ? 'text-green-600' : 'text-red-500'}`}>
+          {message}
+        </p>
+      )}
+      <FooterNav />
     </div>
   );
 };

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUsers } from '../utils/api';
 import Modal from './Modal';
+import FooterNav from './FooterNav';
+
 
 const AdminUserList = () => {
   // 各種ステート管理
@@ -11,6 +13,7 @@ const AdminUserList = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [errors, setErrors] = useState({});
+
 
   // 初期ユーザー読み込み（ID順でソート）
   useEffect(() => {
@@ -105,7 +108,6 @@ const AdminUserList = () => {
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">👤 ユーザー管理</h2>
-
       {/* モバイル用カード表示（〜md） */}
       <div className="block md:hidden space-y-6">
         {users.map((user) => {
@@ -327,6 +329,8 @@ const AdminUserList = () => {
           </div>
         </Modal>
       )}
+
+      <FooterNav />
     </div>
   );
 };

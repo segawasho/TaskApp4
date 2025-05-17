@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
+import FooterNav from './FooterNav';
 
 const StatusMaster = () => {
   const [statuses, setStatuses] = useState([]);
@@ -148,6 +148,8 @@ const StatusMaster = () => {
           </li>
         ))}
       </ul>
+
+      <FooterNav />
     </div>
   );
 };

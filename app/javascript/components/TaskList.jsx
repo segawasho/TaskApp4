@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import CommentSection from '../components/CommentSection';
-
+import FooterNav from './FooterNav';
 
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
@@ -532,8 +532,9 @@ const TaskList = () => {
               </li>
           ))}
         </ul>
-
       </div>
+      
+      <FooterNav />
     </div>
   );
 };

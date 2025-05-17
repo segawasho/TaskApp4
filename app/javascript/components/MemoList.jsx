@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../stylesheets/tailwind.css';
 import MemoEditor from './MemoEditor'
 import Modal from './Modal';
+import FooterNav from './FooterNav';
 
 
 
@@ -365,6 +366,9 @@ const MemoSection = () => {
           )}
         </Modal>
       )}
+
+      <FooterNav />
+
     </div>
   );
 

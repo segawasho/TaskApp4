@@ -5,7 +5,15 @@ class Api::SessionsController < ApplicationController
     user = User.find_by(login_id: params[:login_id])  # ← login_id に変更
     if user&.authenticate(params[:pin])
       token = JsonWebToken.encode(user_id: user.id)
-      render json: { token: token, user: { id: user.id, is_admin: user.is_admin } }, status: :ok
+      render json: {
+        token: token,
+        user: {
+          id: user.id,
+          login_id: user.login_id,
+          name: user.name,
+          is_admin: user.is_admin
+        }
+      }, status: :ok
     else
       render json: { error: '認証に失敗しました' }, status: :unauthorized
     end

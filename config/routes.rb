@@ -1,12 +1,11 @@
 Rails.application.routes.draw do
-  # React SPA のルートたち（非API）
+  # React SPA のベース（すべて home#top を返す）　（非API）
   root 'home#top'
-  get '/tasks',             to: 'home#tasks'
-  get '/memos',             to: 'home#memos'
-  get '/company_master',    to: 'home#company_master'
-  get '/category_master',   to: 'home#category_master'
-  get '/status_master',     to: 'home#status_master'
-  get '/company_dashboard', to: 'home#company_dashboard'
+
+  # React Router対応：SPAが扱うすべてのURLを home#top に返す
+  get '/login/*path', to: 'home#top', constraints: ->(req) { req.format.html? }
+  get '/admin/*path', to: 'home#top', constraints: ->(req) { req.format.html? }
+  get '*path',        to: 'home#top', constraints: ->(req) { req.format.html? }
 
   # APIエンドポイント
   namespace :api do
@@ -25,9 +24,4 @@ Rails.application.routes.draw do
     resources :memos, only: [:index, :create, :update, :destroy]
     resources :progress_comments, only: [:create, :update, :destroy]
   end
-
-  # React Router対応： `/login/1` や `/anything/here` でも `home#top` を返す
-  get '/login/*path', to: 'home#top', constraints: ->(req) { req.format == :html }
-  get '/admin/*path', to: 'home#top', constraints: ->(req) { req.format.html? }
-  get '*path',        to: 'home#top', constraints: ->(req) { req.format.html? }
 end

@@ -1,5 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
+import FooterNav from './FooterNav';
+
 
 const CategoryMaster = () => {
   const [categories, setCategories] = useState([]);
@@ -150,6 +151,8 @@ const CategoryMaster = () => {
           </li>
         ))}
       </ul>
+
+      <FooterNav />
     </div>
   );
 };

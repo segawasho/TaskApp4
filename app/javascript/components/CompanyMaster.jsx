@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
+import FooterNav from './FooterNav';
 
 const CompanyMaster = () => {
   const [companies, setCompanies] = useState([]);
@@ -205,6 +205,8 @@ const CompanyMaster = () => {
           </li>
         ))}
       </ul>
+
+      <FooterNav />
     </div>
   );
 };

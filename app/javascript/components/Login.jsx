@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // React Router v6にて 下記useParamsが使える。
 import { useParams, useNavigate } from 'react-router-dom';
 import { loginUser } from '../utils/api';
+import PinInputPad from './PinInputPad';
 
 const Login = ({ onLogin }) => {
   const { userId } = useParams();
@@ -49,47 +50,8 @@ const Login = ({ onLogin }) => {
 
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-      {/* PIN キーパッド */}
-      <div className="grid grid-cols-3 gap-4 mt-6">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
-            key={num}
-            onClick={() => {
-              if (pin.length < 8) setPin(pin + num);
-            }}
-            className="py-4 bg-gray-200 rounded text-xl font-semibold hover:bg-gray-300"
-          >
-            {num}
-          </button>
-        ))}
-
-        {/* 全削除ボタンを左下に */}
-        <button
-          onClick={() => setPin('')}
-          className="py-4 bg-red-200 text-red-700 rounded text-sm font-medium hover:bg-red-300"
-        >
-          クリア
-        </button>
-
-        {/* 0ボタン */}
-        <button
-          onClick={() => {
-            if (pin.length < 8) setPin(pin + '0');
-          }}
-          className="py-4 bg-gray-200 rounded text-xl font-semibold hover:bg-gray-300"
-        >
-          0
-        </button>
-
-        {/* ログインボタンをテンキー右下に */}
-        <button
-          onClick={handleLogin}
-          className="py-4 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600"
-        >
-          ログイン
-        </button>
-      </div>
-
+      {/* ✅ 共通のテンキーUIを使用 */}
+      <PinInputPad value={pin} setValue={setPin} onSubmit={handleLogin} />
 
     </div>
   );
