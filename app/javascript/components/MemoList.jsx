@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { authFetch } from '../utils/api';
 import MemoEditor from './MemoEditor'
-import Modal from './Modal';
-import Header from './Header';
-import FooterNav from './FooterNav';
-
-
+import Modal from './Modal'
+import PageLayout from './PageLayout';
 
 const MemoSection = (　{user}　) => {
   const [memos, setMemos] = useState([]);
@@ -42,7 +39,6 @@ const MemoSection = (　{user}　) => {
       .then(res => res.json())
       .then(data => setMemos(data));
   }, [filters]);
-
 
   // メモ作成処理
   const handleCreate = () => {
@@ -132,8 +128,7 @@ const MemoSection = (　{user}　) => {
 
 
   return (
-    <div>
-      <Header user={user} />
+    <PageLayout>
       <div className="p-4 space-y-6">
         <h2 className="text-xl font-semibold">メモ一覧</h2>
 
@@ -272,7 +267,7 @@ const MemoSection = (　{user}　) => {
         </div>
 
 
-        {/* 詳細モーダル表示 */}
+        {/* 詳細モーダル表示 ※複雑なためModalContext.js(共通)は使わない */}
         {selectedMemo && (
           <Modal onClose={() => {
             setSelectedMemo(null);
@@ -370,10 +365,8 @@ const MemoSection = (　{user}　) => {
           </Modal>
         )}
 
-        <FooterNav user={user} />
-
       </div>
-    </div>
+    </PageLayout>
   );
 
 };

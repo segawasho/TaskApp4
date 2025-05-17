@@ -2,28 +2,54 @@ import React, { useState } from 'react';
 // ログアウト用
 import { useNavigate, Link } from 'react-router-dom';
 import { logoutUser } from '../utils/api';
-import Header from './Header';
-import FooterNav from './FooterNav';
-import Modal from './Modal';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 
 const TopPage = ({ user }) => {
 
   // ログアウト用
   const navigate = useNavigate();
-  // モーダル用
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  // トースト、モーダル用
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
   const handleLogout = () => {
     logoutUser();
+    showToast('ログアウトしました', 'success');
     navigate(`/login/${user.login_id}`);
   };
 
-  return (
-    <div>
-      <Header user={user} />
+  const confirmLogout = () => {
+    openModal(
+      <div className="text-center space-y-4">
+        <p className="text-lg font-semibold">ログアウトしますか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => {
+              handleLogout();
+              closeModal();
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  };
 
-      <div className="min-h-screen bg-gray-100 pt-20 flex items-center justify-center py-12 px-4">
+  return (
+    <PageLayout>
+
+      <div className="min-h-screen bg-gray-100 pt-4 flex items-center justify-center py-12 px-4">
 
 
         {/* メインコンテンツ */}
@@ -97,44 +123,23 @@ const TopPage = ({ user }) => {
           {/* ログアウト */}
           {user?.name && (
             <div className="flex justify-end mb-4">
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              ログアウト
-            </button>
+              <button
+                onClick={confirmLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                ログアウト
+              </button>
             </div>
           )}
-        </div>
 
-        <FooterNav user={user} />
+
+        </div>
 
       </div>
 
-      // モーダル
-      {showLogoutModal && (
-        <Modal>
-          <div className="text-center space-y-4">
-            <p className="text-lg font-semibold">ログアウトしますか？</p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={handleLogout}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                はい
-              </button>
-              <button
-                onClick={() => setShowLogoutModal(false)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                キャンセル
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
-    </div>
+
+    </PageLayout>
 
   );
 };

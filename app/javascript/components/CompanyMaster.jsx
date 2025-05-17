@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
+
 
 const CompanyMaster = ({ user }) => {
   const [companies, setCompanies] = useState([]);
@@ -10,6 +12,8 @@ const CompanyMaster = ({ user }) => {
   const [editingCompanyId, setEditingCompanyId] = useState(null);
   const [editedCompanyCode, setEditedCompanyCode] = useState('');
   const [editedCompanyName, setEditedCompanyName] = useState('');
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
     fetchCompanies();
@@ -17,9 +21,14 @@ const CompanyMaster = ({ user }) => {
 
   const fetchCompanies = () => {
     authFetch('/api/companies')
-      .then(res => res.json())
-      .then(data => {
-        setCompanies(data);
+      .then(res => {
+        if (!res.ok) throw new Error('取得失敗');
+        return res.json();
+      })
+      .then(data => setCompanies(data))
+      .catch(err => {
+        console.error('企業取得エラー:', err);
+        showToast('企業一覧の取得に失敗しました', 'error');
       });
   };
 
@@ -38,13 +47,22 @@ const CompanyMaster = ({ user }) => {
         }
       })
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('作成失敗');
+        return res.json();
+      })
       .then(() => {
         setNewCompanyName('');
         setNewCompanyCode('');
         fetchCompanies();
+        showToast('企業を追加しました', 'success');
+      })
+      .catch(err => {
+        console.error('作成エラー:', err);
+        showToast('企業の追加に失敗しました', 'error');
       });
   };
+
 
   const handleEditClick = (company) => {
     setEditingCompanyId(company.id);
@@ -66,23 +84,23 @@ const CompanyMaster = ({ user }) => {
         }
       })
     })
+      .then(res => {
+        if (!res.ok) throw new Error('更新失敗');
+        return res.json();
+      })
       .then(() => {
         setEditingCompanyId(null);
         setEditedCompanyName('');
+        setEditedCompanyCode('');
         fetchCompanies();
+        showToast('企業情報を更新しました', 'success');
+      })
+      .catch(err => {
+        console.error('更新エラー:', err);
+        showToast('企業情報の更新に失敗しました', 'error');
       });
   };
 
-  const handleDelete = (id) => {
-    authFetch(`/api/companies/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': getCsrfToken()
-      }
-    }).then(() => {
-      fetchCompanies();
-    });
-  };
 
   const handleRestore = (id) => {
     authFetch(`/api/companies/${id}`, {
@@ -92,10 +110,56 @@ const CompanyMaster = ({ user }) => {
         'X-CSRF-Token': getCsrfToken()
       },
       body: JSON.stringify({ company: { deleted_at: null } })
-    }).then(() => {
-      fetchCompanies();
-    });
+    })
+      .then(() => {
+        fetchCompanies();
+        showToast('企業を復元しました', 'success');
+      })
+      .catch(err => {
+        console.error('復元エラー:', err);
+        showToast('企業の復元に失敗しました', 'error');
+      });
   };
+
+  const handleDelete = (id) => {
+    openModal(
+      <div className="text-center space-y-4">
+        <p>この企業を削除してもよろしいですか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => {
+              authFetch(`/api/companies/${id}`, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': getCsrfToken()
+                }
+              })
+                .then(() => {
+                  fetchCompanies();
+                  showToast('企業を削除しました', 'success');
+                })
+                .catch(() => {
+                  showToast('企業の削除に失敗しました', 'error');
+                })
+                .finally(() => {
+                  closeModal();
+                });
+            }}
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  };
+
 
   const getCsrfToken = () => {
     const tag = document.querySelector('meta[name="csrf-token"]');
@@ -106,8 +170,7 @@ const CompanyMaster = ({ user }) => {
   const deletedCompanies = companies.filter(c => c.deleted_at);
 
   return (
-    <div>
-      <Header user={user} />
+    <PageLayout>
 
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">企業マスタ管理</h2>
@@ -212,9 +275,8 @@ const CompanyMaster = ({ user }) => {
           ))}
         </ul>
 
-        <FooterNav user={user} />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

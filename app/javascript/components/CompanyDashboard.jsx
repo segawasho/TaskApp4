@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
 import Modal from './Modal';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
 
 
 const CompanyDashboard = ( {user} ) => {
@@ -15,22 +15,48 @@ const CompanyDashboard = ( {user} ) => {
   const [showTasks, setShowTasks] = useState(true);
   const [showMemos, setShowMemos] = useState(true);
 
+  const { showToast } = useToast();
+
   useEffect(() => {
     authFetch('/api/companies')
-      .then(res => res.json())
-      .then(data => setCompanies(data.filter(c => !c.deleted_at)));
+      .then(res => {
+        if (!res.ok) throw new Error('取得失敗');
+        return res.json();
+      })
+      .then(data => setCompanies(data.filter(c => !c.deleted_at)))
+      .catch(err => {
+        console.error('企業取得エラー:', err);
+        showToast('企業一覧の取得に失敗しました', 'error');
+      });
   }, []);
+
 
   useEffect(() => {
     if (!selectedCompanyId) return;
+
     authFetch(`/api/tasks?company_id=${selectedCompanyId}`)
-      .then(res => res.json())
-      .then(setTasks);
+      .then(res => {
+        if (!res.ok) throw new Error('タスク取得失敗');
+        return res.json();
+      })
+      .then(setTasks)
+      .catch(err => {
+        console.error('タスク取得エラー:', err);
+        showToast('タスクの取得に失敗しました', 'error');
+      });
 
     authFetch(`/api/memos?company_id=${selectedCompanyId}`)
-      .then(res => res.json())
-      .then(setMemos);
+      .then(res => {
+        if (!res.ok) throw new Error('メモ取得失敗');
+        return res.json();
+      })
+      .then(setMemos)
+      .catch(err => {
+        console.error('メモ取得エラー:', err);
+        showToast('メモの取得に失敗しました', 'error');
+      });
   }, [selectedCompanyId]);
+
 
   const filteredMemos = memos.filter(memo =>
     memo.title.includes(memoFilter.title) &&
@@ -58,8 +84,7 @@ const CompanyDashboard = ( {user} ) => {
   };
 
   return (
-    <div>
-      <Header user={user} />
+    <PageLayout>
       <div className="p-6 space-y-8">
         <h2 className="text-xl sm:text-2xl font-bold">企業別ダッシュボード（閲覧専用）</h2>
 
@@ -180,9 +205,8 @@ const CompanyDashboard = ( {user} ) => {
           </>
         )}
 
-        <FooterNav user={user} />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

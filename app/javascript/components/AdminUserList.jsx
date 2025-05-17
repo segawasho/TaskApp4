@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchUsers } from '../utils/api';
 import Modal from './Modal';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 
 const AdminUserList = () => {
@@ -11,9 +12,9 @@ const AdminUserList = () => {
   const [editing, setEditing] = useState({});
   const [passwords, setPasswords] = useState({});
   const [showPasswordInput, setShowPasswordInput] = useState({});
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
 
   // 初期ユーザー読み込み（ID順でソート）
@@ -30,6 +31,32 @@ const AdminUserList = () => {
     };
     loadUsers();
   }, []);
+
+  // 編集の確認モーダル
+  const handleConfirm = (user) => {
+    openModal(
+      <div className="text-center space-y-4">
+        <p className="text-base font-semibold">
+          「{editing[user.id]?.name}」さんの情報を上書きします。<br />よろしいですか？
+        </p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => handleSave(user)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  };
+
 
   // 編集用のstate更新
   const handleChange = (id, field, value) => {
@@ -49,19 +76,9 @@ const AdminUserList = () => {
     setPasswords((prev) => ({ ...prev, [id]: value }));
   };
 
-  // モーダル開閉処理
-  const openModal = (user) => {
-    setSelectedUser(user);
-    setModalOpen(true);
-  };
-  const closeModal = () => {
-    setModalOpen(false);
-    setSelectedUser(null);
-  };
 
   // 保存処理
   const handleSave = async (user) => {
-    setModalOpen(false);
     setErrors({});
     const updated = {
       name: editing[user.id].name,
@@ -89,7 +106,8 @@ const AdminUserList = () => {
           [user.id]: data.error || '更新に失敗しました',
         }));
       } else {
-        alert('保存しました');
+        closeModal();
+        showToast('ユーザー情報を保存しました', 'success');
         const refreshed = await fetchUsers();
         const sorted = refreshed.sort((a, b) => a.id - b.id);
         setUsers(sorted);
@@ -103,12 +121,12 @@ const AdminUserList = () => {
       }
     } catch (e) {
       setErrors((prev) => ({ ...prev, [user.id]: '通信に失敗しました' }));
+      showToast('通信に失敗しました', 'error');
     }
   };
 
   return (
-    <div>
-      <Header />
+    <PageLayout>
       <div className="p-4 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-6">👤 ユーザー管理</h2>
         {/* モバイル用カード表示（〜md） */}
@@ -191,7 +209,7 @@ const AdminUserList = () => {
                     className={`px-4 py-1 rounded text-white ${
                       canSave ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
                     }`}
-                    onClick={() => canSave && openModal(user)}
+                    onClick={() => canSave && handleConfirm(user)}
                     disabled={!canSave}
                   >
                     保存
@@ -292,7 +310,7 @@ const AdminUserList = () => {
                         className={`px-4 py-1 rounded text-white ${
                           canSave ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
                         }`}
-                        onClick={() => canSave && openModal(user)}
+                        onClick={() => canSave && handleConfirm(user)}
                         disabled={!canSave}
                       >
                         保存
@@ -308,34 +326,8 @@ const AdminUserList = () => {
           </table>
         </div>
 
-        {/* モーダル（確認） */}
-        {modalOpen && selectedUser && (
-          <Modal>
-            <div className="text-center space-y-4">
-              <p className="text-base font-semibold">
-                「{editing[selectedUser.id]?.name}」さんの情報を上書きします。<br />よろしいですか？
-              </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => handleSave(selectedUser)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
-                >
-                  はい
-                </button>
-                <button
-                  onClick={closeModal}
-                  className="bg-gray-300 px-4 py-2 rounded"
-                >
-                  キャンセル
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )}
-
-        <FooterNav />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

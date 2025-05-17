@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 const StatusMaster = ({ user }) => {
   const [statuses, setStatuses] = useState([]);
   const [newStatusName, setNewStatusName] = useState('');
   const [editingStatusId, setEditingStatusId] = useState(null);
   const [editedStatusName, setEditedStatusName] = useState('');
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
     fetchStatuses();
@@ -18,8 +21,13 @@ const StatusMaster = ({ user }) => {
       .then(res => res.json())
       .then(data => {
         setStatuses(data);
+      })
+      .catch(err => {
+        console.error('ステータス一覧取得エラー:', err);
+        showToast('ステータス一覧の取得に失敗しました', 'error');
       });
   };
+
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -31,11 +39,16 @@ const StatusMaster = ({ user }) => {
       },
       body: JSON.stringify({ status: { name: newStatusName } })
     })
-      .then(res => res.json())
-      .then(() => {
-        setNewStatusName('');
-        fetchStatuses();
-      });
+    .then(res => res.json())
+    .then(() => {
+      setNewStatusName('');
+      fetchStatuses();
+      showToast('ステータスを追加しました', 'success');
+    })
+    .catch(err => {
+      console.error('追加エラー:', err);
+      showToast('ステータスの追加に失敗しました', 'error');
+    });
   };
 
   const handleEditClick = (status) => {
@@ -52,21 +65,15 @@ const StatusMaster = ({ user }) => {
       },
       body: JSON.stringify({ status: { name: editedStatusName } })
     })
-      .then(() => {
-        setEditingStatusId(null);
-        setEditedStatusName('');
-        fetchStatuses();
-      });
-  };
-
-  const handleDelete = (id) => {
-    authFetch(`/api/statuses/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': getCsrfToken()
-      }
-    }).then(() => {
+    .then(() => {
+      setEditingStatusId(null);
+      setEditedStatusName('');
       fetchStatuses();
+      showToast('ステータスを更新しました', 'success');
+    })
+    .catch(err => {
+      console.error('更新エラー:', err);
+      showToast('ステータスの更新に失敗しました', 'error');
     });
   };
 
@@ -78,10 +85,53 @@ const StatusMaster = ({ user }) => {
         'X-CSRF-Token': getCsrfToken()
       },
       body: JSON.stringify({ status: { deleted_at: null } })
-    }).then(() => {
+    })
+    .then(() => {
       fetchStatuses();
+      showToast('ステータスを復元しました', 'success');
+    })
+    .catch(err => {
+      console.error('復元エラー:', err);
+      showToast('ステータスの復元に失敗しました', 'error');
     });
   };
+
+  const handleDelete = (id) => {
+    openModal(
+      <div className="text-center space-y-4">
+        <p>このステータスを削除してもよろしいですか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+            onClick={() => {
+              authFetch(`/api/statuses/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-Token': getCsrfToken() }
+              })
+                .then(() => {
+                  fetchStatuses();
+                  showToast('ステータスを削除しました', 'success');
+                })
+                .catch(err => {
+                  console.error('削除エラー:', err);
+                  showToast('ステータスの削除に失敗しました', 'error');
+                })
+                .finally(() => closeModal());
+            }}
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  };
+
 
   const getCsrfToken = () => {
     const tag = document.querySelector('meta[name="csrf-token"]');
@@ -92,8 +142,7 @@ const StatusMaster = ({ user }) => {
   const deletedStatuses = statuses.filter(c => c.deleted_at);
 
   return (
-    <div>
-      <Header user={user} />
+    <PageLayout>
 
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">ステータスマスタ管理</h2>
@@ -154,9 +203,8 @@ const StatusMaster = ({ user }) => {
           ))}
         </ul>
 
-        <FooterNav user={user} />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

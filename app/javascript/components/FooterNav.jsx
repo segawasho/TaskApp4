@@ -23,17 +23,17 @@ const FooterNav = ({ user }) => {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 w-full z-50">
-      <div className="flex text-sm text-center divide-x divide-white">
+    <footer className="fixed bottom-0 left-0 w-full h-14 z-50">
+      <div className="flex h-full text-center bg-white shadow-inner">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex-1 py-3 ${
-                item.bgColor
-              } text-white ${isActive ? 'opacity-100' : 'opacity-100 hover:opacity-100'}`}
+              className={`flex-1 h-full flex flex-col items-center justify-center text-xs font-medium ${item.bgColor} text-white ${
+                isActive ? 'opacity-100' : 'opacity-100 hover:opacity-100'
+              }`}
             >
               {item.label}
             </Link>

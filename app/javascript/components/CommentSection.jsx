@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 const CommentSection = ({ taskId,user }) => {
   const [comments, setComments] = useState([]);
   const [newCommentContent, setNewCommentContent] = useState('');
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editedCommentContent, setEditedCommentContent] = useState('');
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -29,12 +33,21 @@ const CommentSection = ({ taskId,user }) => {
         content: newCommentContent
       })
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('コメント投稿失敗');
+        return res.json();
+      })
       .then(data => {
         setComments(prev => [data, ...prev]);
         setNewCommentContent('');
+        showToast('コメントを追加しました', 'success');
+      })
+      .catch(err => {
+        console.error('コメント追加エラー:', err);
+        showToast('コメントの追加に失敗しました', 'error');
       });
   };
+
 
   const handleEditComment = (commentId, content) => {
     setEditingCommentId(commentId);
@@ -47,23 +60,62 @@ const CommentSection = ({ taskId,user }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: editedCommentContent })
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('更新失敗');
+        return res.json();
+      })
       .then(updated => {
         setComments(prev =>
           prev.map(c => (c.id === commentId ? updated : c))
         );
         setEditingCommentId(null);
         setEditedCommentContent('');
+        showToast('コメントを更新しました', 'success');
+      })
+      .catch(err => {
+        console.error('コメント更新エラー:', err);
+        showToast('コメントの更新に失敗しました', 'error');
       });
   };
 
+
   const handleDeleteComment = (commentId) => {
-    authFetch(`/api/progress_comments/${commentId}`, {
-      method: 'DELETE' })
-      .then(() => {
-        setComments(prev => prev.filter(c => c.id !== commentId));
-      });
+    openModal(
+      <div className="text-center space-y-4">
+        <p>このコメントを削除してもよろしいですか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => {
+              authFetch(`/api/progress_comments/${commentId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+              })
+                .then(() => {
+                  setComments(prev => prev.filter(c => c.id !== commentId));
+                  showToast('コメントを削除しました', 'success');
+                  closeModal();
+                })
+                .catch(err => {
+                  console.error('コメント削除エラー:', err);
+                  showToast('削除に失敗しました', 'error');
+                  closeModal();
+                });
+            }}
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
   };
+
 
   const handleKeyDown = (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

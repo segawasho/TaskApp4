@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
 import CommentSection from '../components/CommentSection';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 const TaskList = ({user}) => {
   const [tasks, setTasks] = useState([]);
@@ -31,7 +32,8 @@ const TaskList = ({user}) => {
   const [sortKey, setSortKey] = useState('created_desc');
   const [showCreateForm, setShowCreateForm] = useState(true);
   const [showFilter, setShowFilter] = useState(true);
-
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
 
   useEffect(() => {
@@ -76,9 +78,18 @@ const TaskList = ({user}) => {
     .then(() => {
       setNewTaskTitle('');
       setNewTaskDescription('');
+      setNewTaskDueDate('');
+      setNewTaskPriority('');
+      setNewTaskCompanyId('');
+      setNewTaskCategoryId('');
+      setNewTaskStatusId('');
+      showToast('新規タスクを追加しました', 'success');
       fetchTasks();
     })
-    .catch(error => console.error('Error creating task:', error));
+    .catch((error) => {
+      console.error('Error creating task:', error);
+      showToast('新規タスクの追加に失敗しました', 'error');
+    });
   };
 
   const handleUpdate = (id) => {
@@ -106,24 +117,60 @@ const TaskList = ({user}) => {
     .then(() => {
       setEditingTaskId(null);
       setEditedTitle('');
+      setEditedTitle('');
+      setEditedDescription('');
+      setEditedDueDate('');
+      setEditedPriority('');
+      setEditedCompanyId('');
+      setEditedCategoryId('');
+      setEditedStatusId('');
+      showToast('タスクを更新しました', 'success');
       fetchTasks();
     })
-    .catch(error => console.error('Error updating task:', error));
+    .catch(error => {
+      console.error('Error updating task:', error);
+      showToast('タスクの更新に失敗しました', 'error');
+    });
   };
 
   const handleDelete = (id) => {
-    authFetch(`/api/tasks/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      setTasks(tasks.filter(task => task.id !== id));
-    })
-    .catch(error => console.error('Error deleting task:', error));
+    openModal(
+      <div className="text-center space-y-4">
+        <p>このタスクを削除してもよろしいですか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => {
+              authFetch(`/api/tasks/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+              })
+                .then((response) => {
+                  if (!response.ok) throw new Error('Network response was not ok');
+                  setTasks(tasks.filter(task => task.id !== id));
+                  showToast('タスクを削除しました', 'success');
+                  closeModal();
+                })
+                .catch((error) => {
+                  console.error('Error deleting task:', error);
+                  showToast('タスクの削除に失敗しました', 'error');
+                  closeModal();
+                });
+            }}
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
   };
+
 
   const fetchMasterData = async () => {
     try {
@@ -143,24 +190,37 @@ const TaskList = ({user}) => {
       setStatuses(statuses.filter(s => !s.deleted_at && s.user_id === user.id));
     } catch (error) {
       console.error('マスタデータの取得に失敗しました:', error);
+      showToast('マスタデータの取得に失敗しました', 'error');
     }
   };
 
   const toggleDone = (task) => {
+    const newIsDone = !task.is_done;
+
     authFetch(`/api/tasks/${task.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ task: { is_done: !task.is_done } }),
+      body: JSON.stringify({ task: { is_done: newIsDone } }),
     })
       .then(res => {
         if (!res.ok) throw new Error('更新失敗');
         return res.json();
       })
-      .then(() => fetchTasks())
-      .catch(err => console.error('完了状態更新エラー:', err));
+      .then(() => {
+        fetchTasks();
+        showToast(
+          newIsDone ? 'タスクを完了にしました' : 'タスクを未完了に戻しました',
+          'success'
+        );
+      })
+      .catch(err => {
+        console.error('完了状態更新エラー:', err);
+        showToast('完了状態の更新に失敗しました', 'error');
+      });
   };
+
 
   // 優先度ごとの色分け
   const getPriorityClass = (priority) => {
@@ -201,45 +261,7 @@ const TaskList = ({user}) => {
 
 
   return (
-    <div>
-      <Header user={user} />
-
-      {/* タブ切り替え（固定ヘッダー化） */}
-      <div className="sticky top-0 z-10 bg-white w-full px-4 py-2 shadow flex justify-center">
-        <button
-          onClick={() => setShowDoneFilter('not_done')}
-          className={`w-2/5 mx-1 px-4 py-2 rounded-xl text-sm font-medium ${
-            showDoneFilter === 'not_done'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700'
-          }`}
-        >
-          未完了
-        </button>
-        <button
-          onClick={() => setShowDoneFilter('done')}
-          className={`w-2/5 mx-1 px-4 py-2 rounded-xl text-sm font-medium ${
-            showDoneFilter === 'done'
-              ? 'bg-green-600 text-white'
-              : 'bg-gray-200 text-gray-700'
-          }`}
-        >
-          完了
-        </button>
-        <button
-          onClick={() => setShowDoneFilter('all')}
-          className={`w-1/5 mx-1 px-4 py-2 rounded-xl text-sm font-medium ${
-            showDoneFilter === 'all'
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-200 text-gray-700'
-          }`}
-        >
-          すべて
-        </button>
-      </div>
-
-
-
+    <PageLayout>
 
 
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
@@ -364,6 +386,27 @@ const TaskList = ({user}) => {
                 <option value="priority_asc">優先順</option>
               </select>
             </label>
+
+            <div className="flex gap-2 mt-4">
+              {[
+                { key: 'not_done', label: '未完了' },
+                { key: 'done', label: '完了' },
+                { key: 'all', label: 'すべて' },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setShowDoneFilter(key)}
+                  className={`px-3 py-1 rounded border text-sm transition
+                    ${showDoneFilter === key
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}
+                  `}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
           </div>
         )}
 
@@ -544,8 +587,7 @@ const TaskList = ({user}) => {
         </ul>
       </div>
 
-      <FooterNav user={user} />
-    </div>
+    </PageLayout>
   );
 };
 

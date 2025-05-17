@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { authFetch } from '../utils/api';
-import Header from './Header';
-import FooterNav from './FooterNav';
+import PageLayout from './PageLayout';
+import { useToast } from '../contexts/ToastContext';
+import { useModal } from '../contexts/ModalContext';
 
 
 const CategoryMaster = ({ user }) => {
@@ -9,6 +10,8 @@ const CategoryMaster = ({ user }) => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [editedCategoryName, setEditedCategoryName] = useState('');
+  const { showToast } = useToast();
+  const { openModal, closeModal } = useModal();
 
   useEffect(() => {
     fetchCategories();
@@ -17,8 +20,10 @@ const CategoryMaster = ({ user }) => {
   const fetchCategories = () => {
     authFetch('/api/categories')
       .then(res => res.json())
-      .then(data => {
-        setCategories(data);
+      .then(data => setCategories(data))
+      .catch(err => {
+        console.error('カテゴリ取得エラー:', err);
+        showToast('カテゴリ一覧の取得に失敗しました', 'error');
       });
   };
 
@@ -36,6 +41,11 @@ const CategoryMaster = ({ user }) => {
       .then(() => {
         setNewCategoryName('');
         fetchCategories();
+        showToast('カテゴリを追加しました', 'success');
+      })
+      .catch(err => {
+        console.error('作成エラー:', err);
+        showToast('カテゴリの追加に失敗しました', 'error');
       });
   };
 
@@ -53,21 +63,15 @@ const CategoryMaster = ({ user }) => {
       },
       body: JSON.stringify({ category: { name: editedCategoryName } })
     })
-      .then(() => {
-        setEditingCategoryId(null);
-        setEditedCategoryName('');
-        fetchCategories();
-      });
-  };
-
-  const handleDelete = (id) => {
-    authFetch(`/api/categories/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': getCsrfToken()
-      }
-    }).then(() => {
+    .then(() => {
+      setEditingCategoryId(null);
+      setEditedCategoryName('');
       fetchCategories();
+      showToast('カテゴリを更新しました', 'success');
+    })
+    .catch(err => {
+      console.error('更新エラー:', err);
+      showToast('カテゴリの更新に失敗しました', 'error');
     });
   };
 
@@ -79,10 +83,53 @@ const CategoryMaster = ({ user }) => {
         'X-CSRF-Token': getCsrfToken()
       },
       body: JSON.stringify({ category: { deleted_at: null } })
-    }).then(() => {
+    })
+    .then(() => {
       fetchCategories();
+      showToast('カテゴリを復元しました', 'success');
+    })
+    .catch(err => {
+      console.error('復元エラー:', err);
+      showToast('カテゴリの復元に失敗しました', 'error');
     });
   };
+
+  const handleDelete = (id) => {
+    openModal(
+      <div className="text-center space-y-4">
+        <p>このカテゴリを削除してもよろしいですか？</p>
+        <div className="flex justify-center gap-4">
+          <button
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+            onClick={() => {
+              authFetch(`/api/categories/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-Token': getCsrfToken() }
+              })
+                .then(() => {
+                  fetchCategories();
+                  showToast('カテゴリを削除しました', 'success');
+                })
+                .catch(err => {
+                  console.error('削除エラー:', err);
+                  showToast('カテゴリの削除に失敗しました', 'error');
+                })
+                .finally(() => closeModal());
+            }}
+          >
+            はい
+          </button>
+          <button
+            onClick={closeModal}
+            className="bg-gray-300 px-4 py-2 rounded"
+          >
+            キャンセル
+          </button>
+        </div>
+      </div>
+    );
+  };
+
 
   const getCsrfToken = () => {
     const tag = document.querySelector('meta[name="csrf-token"]');
@@ -93,8 +140,7 @@ const CategoryMaster = ({ user }) => {
   const deletedCategories = categories.filter(c => c.deleted_at);
 
   return (
-    <div>
-      <Header user={user} />
+    <PageLayout>
       <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
         <h2 className="text-2xl font-bold text-gray-800">カテゴリマスタ管理</h2>
 
@@ -156,9 +202,8 @@ const CategoryMaster = ({ user }) => {
           ))}
         </ul>
 
-        <FooterNav user={user} />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

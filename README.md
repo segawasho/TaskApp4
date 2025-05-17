@@ -1,3 +1,4 @@
+
 # TaskApp4 - タスク & メモ管理アプリ
 
 ## 🧩 概要
@@ -13,12 +14,13 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 - ✅ **PINのみでログイン**（ユーザーIDはURLで指定：例 `/login/segawa`）
 - ✅ **タスク管理**
   - タスクの一覧表示・絞り込み（企業／カテゴリ／ステータス）
-  - タスクの登録・編集・完了チェック
-  - 今後対応：Excel出力
+  - タスクの登録・編集・完了チェック・削除（削除時はモーダル確認あり）
+  - コメント投稿／編集／削除（削除時はモーダル確認あり）
+  - タブ切り替え（未完了・完了・すべて）をフィルターUI内に統合
 - ✅ **メモ管理**
   - メモの作成・編集・削除（企業別に分類）
-  - 本文は TipTapエディタで装飾・リンク対応
-  - 今後対応：TipTapエディタで表対応
+  - 本文は TipTapエディタで装飾・リンク対応（編集時は共通モーダル非使用）
+  - 削除・アーカイブ時のみ共通モーダルで確認表示
 - ✅ **マスタ管理機能**
   - 企業マスタ・カテゴリマスタ・ステータスマスタ
   - 今後対応：CSV取込・出力
@@ -27,9 +29,13 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 - ✅ **ユーザー管理（管理者）**
   - 一般ユーザーの情報編集、PIN再設定
   - 自分のパスワード変更（旧パスワード不要）
+  - 各データ（タスク、メモ、マスタ等）に `user_id` を保持し、ログインユーザーに紐付くデータのみ表示
 - ✅ **スマホUI対応**
   - TailwindCSSによるレスポンシブ対応
   - 数字ボタンでのPIN入力
+- ✅ **共通トースト通知／モーダル確認UI**
+  - ToastContext / ModalContext による状態管理
+  - 成功・失敗時にトースト表示、削除やアーカイブ確認にはモーダル使用（一部メモ詳細モーダルのみ複雑なため、未使用）
 
 ---
 
@@ -70,88 +76,55 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 | `/category_master` | カテゴリマスタ |
 | `/status_master` | ステータスマスタ |
 
-
----
-
-## 🤖 GPT用アプリ定義メタデータ
-
-```json
-{
-  "name": "TaskApp4",
-  "description": "タスクとメモを管理するRails+ReactベースのSPAアプリケーション。JWTによるPIN認証を導入し、ユーザーはURL内のlogin_idを使用してログインする。",
-  "tech_stack": {
-    "frontend": ["React 18", "React Router v6", "TailwindCSS"],
-    "backend": ["Ruby on Rails 7.0.8", "Webpacker"],
-    "auth": "JWT (PIN-based login)",
-    "database": "PostgreSQL"
-  },
-  "features": [
-    "PINのみのJWTログイン（URLにlogin_id}）",
-    "トークンのlocalStorage保存",
-    "ログイン後にトップページへリダイレクト",
-    "ユーザーごとのタスク・メモ表示",
-    "企業・カテゴリ・ステータスマスタの管理",
-    "管理者によるユーザー管理とPIN再設定",
-    "自アカウントのパスワード変更",
-    "スマホ対応のPINテンキーUI"
-  ],
-  "routes": {
-    "login": "/login/:login_id",
-    "api_login": "/api/login",
-    "api_me": "/api/me",
-    "admin_users": "/admin/users",
-    "password_settings": "/settings/password",
-    "root": "/",
-    "fallback": "*path → home#top"
-  }
-}
-```
-
----
-
-## 📦 JWTトークン処理（lib配下）について
-
-JWTのエンコード・デコード処理は `lib/json_web_token.rb` に定義されています。  
-Railsアプリ全体で使えるよう、以下の設定を追加しています：
-
-```rb
-# config/application.rb
-config.autoload_paths << Rails.root.join('lib')
-```
-
-以降、各コントローラからは `JsonWebToken.encode` / `decode` として利用可能です。
-
-## 🧷 リポジトリ
-
-[GitHub - segawasho/TaskApp4](https://github.com/segawasho/TaskApp4)
 ---
 
 ## 🛠 補足・実装上のルール（引き継ぎ用）
 
 ### 🔧 フロントエンド構成ルール
-- `app/javascript/packs/` はすべて `createRoot().render()` 形式に統一（例：`admin.jsx`, `settings_password.jsx`）
-- Reactコンポーネントは `app/javascript/components/` に保存し、packsからインポート
+- `app/javascript/packs/` はすべて `createRoot().render()` 形式に統一
+- Reactコンポーネントは `app/javascript/components/` に保存
 - TailwindCSSは PostCSS7 対応、`application.js` で読み込み
-- PIN入力欄には表示/非表示トグルおよびテンキーUIを併設
+- ToastContext / ModalContext による共通UI制御を導入（タスク・メモの削除等に活用）
 
 ### 🔐 ログイン・ユーザー状態管理
-- JWTはログイン成功時に `localStorage.token` として保存
-- ユーザー情報は `localStorage.user`（JSON文字列）として保存し、`App.jsx` 内で `setUser()`
-- App初回レンダリング時に `/api/me` を叩いてログイン状態を取得（useEffect使用）
-- `TopPage.jsx` などでは `user?.name` を条件に描画制御（「ようこそ、さん」問題の対策）
+- JWTはログイン成功時に `localStorage.token` に保存
+- ユーザー情報は `localStorage.user` にJSONで保存し、`App.jsx` 内で `setUser()`
+- App初回で `/api/me` を叩いてログイン状態確認
+- 各データには `user_id` を保持、API側でもログインユーザーに限定したデータのみ返却
 
 ### 👤 管理者画面とユーザー操作
-- `is_admin` は基本的に1ユーザーのみを予定（チェックボックスによる切り替えは非対応）
-- 管理者は他ユーザーの `name`, `login_id`, `password` を一括更新可
-- 通常ユーザーは `/settings/password` にて自分のPINを変更（旧パスワード不要）
+- `is_admin` は主に1ユーザー（チェック切替ではなく固定）
+- 管理者は他ユーザーの `name`, `login_id`, `password` を一括編集可
+- 通常ユーザーは `/settings/password` にて自分のPINを変更（旧パス不要）
 
 ### 🔁 UX対応
-- タスクへのコメント送信は `Ctrl+Enter` / `⌘Cmd+Enter` でも実行可能
-- PIN送信は `Ctrl+Enter` / `⌘Cmd+Enter` でも実行可能
-- トークン失効時の401エラー対応や再認証リダイレクトは未実装
+- コメント・PINは `Ctrl+Enter` / `⌘Cmd+Enter` 送信対応
+- 削除操作などにはモーダルで確認、成功・失敗時にトースト通知表示
+- モバイル操作を考慮し、各画面の下部にフッターナビを固定（高さぶん余白調整済）
 
 ---
 
+## 🤖 ChatGPT利用時の補足
+
+- コード補助やREADME編集時に **Canvas（サイドエディタ機能）ではなく、通常のテキストベースで対応希望**
+- Canvasはページが重くなるため、使用しないようにしてください
+- ファイルのアップロードや構造整理などはこれまで通りテキストで丁寧に進行してください
+
+---
+
+## 🔄 直近の改善ポイント（2025年5月18日）
+
+- ✅ **ToastContext / ModalContext を導入し、アプリ全体の通知・確認モーダルを統一**
+  - トースト：保存成功／失敗、削除、復元、通信エラー時などに通知
+  - モーダル：削除・保存時の確認UIを共通化（`useModal()`で表示）
+- ✅ **Header / Footer を全ページで共通化**
+  - `PageLayout.jsx` を導入し、`<Header>`, `<FooterNav>` の固定表示と余白管理を共通化
+- ✅ **パスワード変更・ユーザー管理画面も共通UI対応**
+  - `/settings/password`（一般ユーザー）
+  - `/admin/users`（管理者専用）で保存・失敗時に共通トースト使用
+- ✅ **旧記述（alertやlocalなモーダル）を全て削除**し、`contexts/` 経由に統一
+
+---
 
 ## 🧪 今後の拡張案（予定）
 
@@ -160,6 +133,10 @@ config.autoload_paths << Rails.root.join('lib')
 - TipTapの表対応、メモのファイル添付（S3を想定）
 - Renderの有料プラン（Starter）を想定したデプロイ予定
   - S3などの外部ストレージと併用し、ストレージ制限に配慮
-- Renderのsleep問題は、Renderの[cron job]機能や、無料のpingサービス（UptimeRobotなど）を使い回避
+  - 無料プランのsleep回避には、Renderの[cron job]機能や、無料のpingサービス（UptimeRobotなど）を使い回避
 
 ---
+
+## 🧷 リポジトリ
+
+[GitHub - segawasho/TaskApp4](https://github.com/segawasho/TaskApp4)
