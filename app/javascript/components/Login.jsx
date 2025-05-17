@@ -48,16 +48,10 @@ const Login = ({ onLogin }) => {
       </div>
 
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-      <button
-        onClick={handleLogin}
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded"
-      >
-        ログイン
-      </button>
 
-      {/* モバイル専用 PIN キーパッド */}
-      <div className="grid grid-cols-3 gap-4 mt-6 sm:hidden">
-        {[1,2,3,4,5,6,7,8,9].map((num) => (
+      {/* PIN キーパッド */}
+      <div className="grid grid-cols-3 gap-4 mt-6">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
             onClick={() => {
@@ -68,24 +62,34 @@ const Login = ({ onLogin }) => {
             {num}
           </button>
         ))}
-        <div></div>
+
+        {/* 全削除ボタンを左下に */}
+        <button
+          onClick={() => setPin('')}
+          className="py-4 bg-red-200 text-red-700 rounded text-sm font-medium hover:bg-red-300"
+        >
+          クリア
+        </button>
+
+        {/* 0ボタン */}
         <button
           onClick={() => {
-            if (pin.length < 8) setPin(pin + num);
+            if (pin.length < 8) setPin(pin + '0');
           }}
           className="py-4 bg-gray-200 rounded text-xl font-semibold hover:bg-gray-300"
         >
           0
         </button>
+
+        {/* ログインボタンをテンキー右下に */}
         <button
-        onClick={() => {
-          if (pin.length < 8) setPin(pin + num);
-        }}
-          className="py-4 bg-red-200 text-red-700 rounded text-sm font-medium hover:bg-red-300"
+          onClick={handleLogin}
+          className="py-4 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600"
         >
-          削除
+          ログイン
         </button>
       </div>
+
 
     </div>
   );
