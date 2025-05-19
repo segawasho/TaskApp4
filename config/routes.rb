@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   namespace :api do
     post '/login', to: 'sessions#create'
     get '/me',     to: 'sessions#me'
+    get 'dashboard/summary', to: 'dashboard#summary'
 
     resources :users, only: [:index, :update]
     patch '/password', to: 'users#update_password'

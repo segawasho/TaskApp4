@@ -36,6 +36,15 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 - ✅ **共通トースト通知／モーダル確認UI**
   - ToastContext / ModalContext による状態管理
   - 成功・失敗時にトースト表示、削除やアーカイブ確認にはモーダル使用（一部メモ詳細モーダルのみ複雑なため、未使用）
+- ✅ **ダッシュボード機能**
+  - タスクの集計を視覚化し、TopPageに統合表示
+  - ステータス別（円グラフ）、期限別（棒グラフ）、企業別タスク（表形式）
+  - `/api/dashboard/summary` でJWT認証下のユーザーに紐づくタスクを集計・返却
+  - 表示は `Dashboard.jsx` 経由で `<TopPage />` に読み込み
+  - グラフ描画に Chart.js + react-chartjs-2 を使用
+  - `chart.js@4.4.0`, `react-chartjs-2@5.2.0`, `chartjs-plugin-datalabels` を導入
+  - 期限判定は日本時間（JST）で正確に分類
+  - Rails側(application.rb)で `Time.zone.today` を使用し、`due_date` を DATE型比較
 
 ---
 

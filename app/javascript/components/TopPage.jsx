@@ -5,6 +5,8 @@ import { logoutUser } from '../utils/api';
 import PageLayout from './PageLayout';
 import { useToast } from '../contexts/ToastContext';
 import { useModal } from '../contexts/ModalContext';
+import Dashboard from '../components/dashboards/Dashboard';
+
 
 
 const TopPage = ({ user }) => {
@@ -54,6 +56,8 @@ const TopPage = ({ user }) => {
 
         {/* メインコンテンツ */}
         <div className="max-w-3xl w-full space-y-10">
+
+          <Dashboard />
 
           {/* メイン機能 */}
           <div className="bg-white p-8 rounded-lg shadow-md">

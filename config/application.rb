@@ -15,6 +15,8 @@ module TaskApp4
 
     config.autoload_paths << Rails.root.join('lib')
 
+    config.time_zone = 'Tokyo'
+    config.active_record.default_timezone = :local
 
     # Configuration for the application, engines, and railties goes here.
     #
