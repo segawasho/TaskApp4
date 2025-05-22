@@ -1,20 +1,18 @@
-export const loginUser = async (id, pin) => {
+export const loginUser = async (email, password) => {
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        login_id: id,
-        pin,
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) throw new Error('ログイン失敗');
 
     const data = await res.json();
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('jwt', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
     return data.user;
   } catch (err) {
     console.error(err);
@@ -24,7 +22,7 @@ export const loginUser = async (id, pin) => {
 
 // 認証付きfetch
 export const authFetch = async (url, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwt');
   const headers = {
     ...(options.headers || {}),
     Authorization: `Bearer ${token}`,
@@ -36,7 +34,7 @@ export const authFetch = async (url, options = {}) => {
   // トークンの保存と取得
   // ログイン時に取得したJWTトークンをlocalStorageに保存し、トップページ読み込み時にそれを取得してログイン状態を確認する
 export const getCurrentUser = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwt');
   if (!token) return null;
 
   try {
@@ -56,14 +54,14 @@ export const getCurrentUser = async () => {
 
 // ログアウト処理（共通化）
 export const logoutUser = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  localStorage.removeItem('jwt');
+  localStorage.removeItem('current_user');
 };
 
 
 // ユーザー一覧取得（管理者用）
 export const fetchUsers = async () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwt');
   const res = await fetch('/api/users', {
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +79,7 @@ export const fetchUsers = async () => {
 
 // 管理側でのパスワード更新
 export const updateUserPassword = async (id, password) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwt');
   const res = await fetch(`/api/users/${id}`, {
     method: 'PUT',
     headers: {
@@ -97,7 +95,7 @@ export const updateUserPassword = async (id, password) => {
 
 // User 自身のパスワード変更
 export const updatePassword = async (newPassword) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwt');
   const res = await fetch('/api/password', {
     method: 'PATCH',
     headers: {

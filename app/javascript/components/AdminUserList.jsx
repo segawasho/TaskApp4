@@ -25,7 +25,7 @@ const AdminUserList = () => {
       setUsers(sorted);
       const init = {};
       sorted.forEach((u) => {
-        init[u.id] = { name: u.name, login_id: u.login_id };
+        init[u.id] = { name: u.name, email: u.email };
       });
       setEditing(init);
     };
@@ -82,14 +82,14 @@ const AdminUserList = () => {
     setErrors({});
     const updated = {
       name: editing[user.id].name,
-      login_id: editing[user.id].login_id,
+      email: editing[user.id].email,
     };
     if (showPasswordInput[user.id] && passwords[user.id]) {
       updated.password = passwords[user.id];
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('jwt');
       const res = await fetch(`/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
@@ -113,7 +113,7 @@ const AdminUserList = () => {
         setUsers(sorted);
         const init = {};
         sorted.forEach((u) => {
-          init[u.id] = { name: u.name, login_id: u.login_id };
+          init[u.id] = { name: u.name, email: u.email };
         });
         setEditing(init);
         setPasswords((prev) => ({ ...prev, [user.id]: '' }));
@@ -134,7 +134,7 @@ const AdminUserList = () => {
           {users.map((user) => {
             const edited = editing[user.id];
             const nameChanged = edited?.name !== user.name;
-            const loginIdChanged = edited?.login_id !== user.login_id;
+            const loginIdChanged = edited?.email !== user.email;
             const passwordChanged = showPasswordInput[user.id] && passwords[user.id];
             const canSave = nameChanged || loginIdChanged || passwordChanged;
 
@@ -159,16 +159,10 @@ const AdminUserList = () => {
                   <div className="text-xs text-gray-500 mt-1">(※半角英数字10文字まで)</div>
                   <input
                     type="text"
-                    maxLength={10}
+                    maxLength={50}
                     className="border rounded w-full px-2 py-1"
-                    value={edited?.login_id || ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      // 半角英数字のみ許可（a〜z, A〜Z, 0〜9）
-                      if (/^[a-zA-Z0-9]*$/.test(val)) {
-                        handleChange(user.id, 'login_id', val);
-                      }
-                    }}
+                    value={edited?.email || ''}
+                    onChange={(e) => handleChange(user.id, 'email', e.target.value)}
                   />
                 </div>
 
@@ -249,7 +243,7 @@ const AdminUserList = () => {
               {users.map((user) => {
                 const edited = editing[user.id];
                 const nameChanged = edited?.name !== user.name;
-                const loginIdChanged = edited?.login_id !== user.login_id;
+                const loginIdChanged = edited?.email !== user.email;
                 const passwordChanged = showPasswordInput[user.id] && passwords[user.id];
                 const canSave = nameChanged || loginIdChanged || passwordChanged;
 
@@ -270,12 +264,12 @@ const AdminUserList = () => {
                         type="text"
                         maxLength={10}
                         className="border px-2 py-1 w-full"
-                        value={edited?.login_id || ''}
+                        value={edited?.email || ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           // 半角英数字のみ許可（a〜z, A〜Z, 0〜9）
                           if (/^[a-zA-Z0-9]*$/.test(val)) {
-                            handleChange(user.id, 'login_id', val);
+                            handleChange(user.id, 'email', val);
                           }
                         }}
                       />

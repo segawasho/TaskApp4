@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_17_125359) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -82,13 +82,23 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_17_125359) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "login_id", limit: 20, null: false
     t.string "name", limit: 20, null: false
     t.string "password_digest", null: false
     t.boolean "is_admin", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["login_id"], name: "index_users_on_login_id", unique: true
+    t.string "email", null: false
+    t.string "prefecture"
+    t.string "city"
+    t.string "utm_source"
+    t.string "utm_medium"
+    t.boolean "has_project_plan", default: false
+    t.boolean "has_wbs_plan", default: false
+    t.boolean "has_file_upload_plan", default: false
+    t.boolean "has_full_package_plan", default: false
+    t.boolean "has_annual_plan", default: false
+    t.boolean "is_invited_user", default: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "categories", "users"

@@ -27,6 +27,18 @@ const App = () => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem('current_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('ユーザー情報の復元に失敗しました', e);
+      }
+    }
+  }, []);
+
+
   if (loading) return <p>Loading...</p>; // 初回読み込み防止
 
   return (
@@ -35,7 +47,7 @@ const App = () => {
         <BrowserRouter>
           <>
             <Routes>
-              <Route path="/login/:userId" element={<Login onLogin={setUser} />} />
+              <Route path="/login" element={<Login onLogin={setUser} />} />
               {user ? (
                 <>
                   <Route path="/" element={<TopPage user={user} />} />

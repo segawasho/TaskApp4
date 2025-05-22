@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   root 'home#top'
 
   # React Router対応：SPAが扱うすべてのURLを home#top に返す
-  get '/login/*path', to: 'home#top', constraints: ->(req) { req.format.html? }
+  get '/login', to: 'home#top', constraints: ->(req) { req.format.html? }
   get '/admin/*path', to: 'home#top', constraints: ->(req) { req.format.html? }
   get '*path',        to: 'home#top', constraints: ->(req) { req.format.html? }
 

@@ -11,7 +11,7 @@ const Header = ({ user }) => {
 
   const handleLogout = () => {
     logoutUser();
-    navigate(`/login/${user.login_id}`);
+    navigate(`/login/${user.email}`);
   };
 
   return (

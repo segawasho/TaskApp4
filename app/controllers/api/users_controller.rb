@@ -3,7 +3,7 @@ class Api::UsersController < ApplicationController
   before_action :authenticate_admin!, only: [:index, :update]
 
   def index
-    users = User.all.select(:id, :login_id, :name, :is_admin)
+    users = User.all.select(:id, :email, :name, :is_admin)
     render json: users
   end
 
@@ -33,7 +33,7 @@ class Api::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:name, :login_id, :is_admin, :password)
+    params.require(:user).permit(:name, :email, :is_admin, :password)
   end
 
   def authenticate_admin!

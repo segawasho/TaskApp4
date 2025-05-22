@@ -20,7 +20,7 @@ const TopPage = ({ user }) => {
   const handleLogout = () => {
     logoutUser();
     showToast('ログアウトしました', 'success');
-    navigate(`/login/${user.login_id}`);
+    navigate('/login');
   };
 
   const confirmLogout = () => {

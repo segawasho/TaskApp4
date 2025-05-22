@@ -2,14 +2,14 @@ class Api::SessionsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    user = User.find_by(login_id: params[:login_id])  # ← login_id に変更
-    if user&.authenticate(params[:pin])
+    user = User.find_by(email: params[:email])
+    if user&.authenticate(params[:password])
       token = JsonWebToken.encode(user_id: user.id)
       render json: {
         token: token,
         user: {
           id: user.id,
-          login_id: user.login_id,
+          email: user.email,
           name: user.name,
           is_admin: user.is_admin
         }
@@ -28,7 +28,7 @@ class Api::SessionsController < ApplicationController
       render json: {
         id: user.id,
         name: user.name,
-        login_id: user.login_id,
+        email: user.email,
         is_admin: user.is_admin
       }, status: :ok
     else
