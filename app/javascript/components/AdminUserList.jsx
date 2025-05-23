@@ -94,9 +94,8 @@ const AdminUserList = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ user: updated }),
+        credentials: 'include',
       });
 
       if (!res.ok) {

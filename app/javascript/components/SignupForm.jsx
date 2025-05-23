@@ -52,15 +52,16 @@ const SignupForm = ({ onSignup }) => {
     setError('');
     try {
       const res = await apiPost('/api/signup', { user: form });
-      localStorage.setItem('jwt', res.jwt);
-      localStorage.setItem('user', JSON.stringify(res.user));
+      onSignup(res.user); // App.jsxのuser stateを更新
       showToast('登録に成功しました');
       navigate('/');
     } catch (err) {
-      setError(err.errors?.[0] || '登録に失敗しました');
-      showToast('登録に失敗しました', 'error');
+      const messages = err?.errors?.join('\n') || '登録に失敗しました';
+      setError(messages);
+      showToast(messages, 'error');
     }
   };
+
 
   return (
     <>

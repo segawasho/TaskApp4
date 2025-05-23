@@ -9,6 +9,7 @@ class User < ApplicationRecord
     role&.name == 'その他'
   }
 
+  has_many :refresh_tokens, dependent: :destroy
   has_many :tasks
   has_many :progress_comments
   has_many :memos

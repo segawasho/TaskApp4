@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../utils/api'; // loginUserをapi.jsから呼び出し
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -9,27 +10,15 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!res.ok) throw new Error('ログイン失敗');
-      const data = await res.json();
-
-      localStorage.setItem('jwt', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      onLogin(data.user);
+    setError('');
+    const user = await loginUser(email, password);
+    if (user) {
+      onLogin(user); // App側のuseStateに反映
       navigate('/');
-    } catch (err) {
+    } else {
       setError('ログインに失敗しました');
     }
   };
-
 
   return (
     <div className="p-6 max-w-sm mx-auto text-center">
@@ -50,9 +39,7 @@ const Login = ({ onLogin }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-              handleLogin();
-            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleLogin();
           }}
           className="w-full p-2 border rounded mb-2 pr-12"
         />

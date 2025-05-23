@@ -17,32 +17,21 @@ class Api::UsersController < ApplicationController
   end
 
   def update_password
-    header = request.headers['Authorization']
-    token = header&.split(' ')&.last
-    decoded = JsonWebToken.decode(token)
+    unless current_user
+      render json: { error: 'ユーザーが見つかりません' }, status: :unauthorized
+      return
+    end
 
-    user = User.find_by(id: decoded[:user_id])
-    if user&.update(password: params[:password])
+    if current_user.update(password: params[:password])
       render json: { message: 'パスワード変更成功' }, status: :ok
     else
-      render json: { error: user&.errors&.full_messages || ['更新できませんでした'] }, status: :unprocessable_entity
+      render json: { error: current_user.errors.full_messages }, status: :unprocessable_entity
     end
   end
-
 
   private
 
   def user_params
     params.require(:user).permit(:name, :email, :is_admin, :password)
-  end
-
-  def authenticate_admin!
-    header = request.headers['Authorization']
-    token = header&.split(' ')&.last
-    decoded = JsonWebToken.decode(token)
-
-    unless decoded && User.find(decoded[:user_id]).is_admin
-      render json: { error: '許可されていません' }, status: :unauthorized
-    end
   end
 end

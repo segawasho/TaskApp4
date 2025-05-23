@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import SignupForm from './SignupForm';
 import Login from './Login';
 import TopPage from './TopPage';
@@ -12,71 +12,67 @@ import CompanyMaster from './CompanyMaster';
 import CategoryMaster from './CategoryMaster';
 import StatusMaster from './StatusMaster';
 import { getCurrentUser } from '../utils/api';
-import { ToastProvider } from '../contexts/ToastContext';
+import { ToastProvider, useToast } from '../contexts/ToastContext';
 import { ModalProvider } from '../contexts/ModalContext';
 
-const App = () => {
+const AppRoutes = ({ user, setUser }) => {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login onLogin={setUser} />} />
+      <Route path="/signup" element={<SignupForm onSignup={setUser} />} />
+      {user ? (
+        <>
+          <Route path="/" element={<TopPage user={user} />} />
+          <Route path="/admin/users" element={<AdminUserList user={user} />} />
+          <Route path="/settings/password" element={<PasswordSettings user={user} />} />
+          <Route path="/tasks" element={<TaskList user={user} />} />
+          <Route path="/memos" element={<MemoList user={user} />} />
+          <Route path="/company_dashboard" element={<CompanyDashboard user={user} />} />
+          <Route path="/company_master" element={<CompanyMaster user={user} />} />
+          <Route path="/category_master" element={<CategoryMaster user={user} />} />
+          <Route path="/status_master" element={<StatusMaster user={user} />} />
+          <Route path="*" element={<TopPage user={user} />} />
+        </>
+      ) : (
+        <Route path="*" element={<p>ログインしてください</p>} />
+      )}
+    </Routes>
+  );
+};
+
+const AppInner = () => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // ローディング中か
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchUser = async () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error('ユーザー復元失敗', e);
-        }
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser || null);
+      } catch (err) {
+        setUser(null);
+        showToast('ログインしてください', 'error');
+        navigate('/login');
+      } finally {
+        setLoading(false);
       }
-
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        console.warn('トークン無効または期限切れ');
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('user');
-        setUser(null); // 明示的にnullに
-      }
-
-      setLoading(false);
     };
-
     fetchUser();
   }, []);
 
+  if (loading) return <p>Loading...</p>;
 
+  return <AppRoutes user={user} setUser={setUser} />;
+};
 
-
-  if (loading) return <p>Loading...</p>; // 初回読み込み防止
-
+const App = () => {
   return (
     <ToastProvider>
       <ModalProvider>
         <BrowserRouter>
-          <>
-            <Routes>
-              <Route path="/login" element={<Login onLogin={setUser} />} />
-              <Route path="/signup" element={<SignupForm onSignup={setUser} />} />
-              {user ? (
-                <>
-                  <Route path="/" element={<TopPage user={user} />} />
-                  <Route path="/admin/users" element={<AdminUserList user={user} />} />
-                  <Route path="/settings/password" element={<PasswordSettings user={user} />} />
-                  <Route path="/tasks" element={<TaskList user={user} />} />
-                  <Route path="/memos" element={<MemoList user={user} />} />
-                  <Route path="/company_dashboard" element={<CompanyDashboard user={user} />} />
-                  <Route path="/company_master" element={<CompanyMaster user={user} />} />
-                  <Route path="/category_master" element={<CategoryMaster user={user} />} />
-                  <Route path="/status_master" element={<StatusMaster user={user} />} />
-                  <Route path="*" element={<TopPage user={user} />} />
-                </>
-              ) : (
-                <Route path="*" element={<p>ログインしてください</p>} />
-              )}
-            </Routes>
-          </>
+          <AppInner />
         </BrowserRouter>
       </ModalProvider>
     </ToastProvider>

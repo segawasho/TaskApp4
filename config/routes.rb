@@ -9,11 +9,14 @@ Rails.application.routes.draw do
 
   # APIエンドポイント
   namespace :api do
+    get 'tokens/refresh'
     get 'industries/index'
     get 'roles/index'
     post '/signup', to: 'registrations#create'
     post '/login', to: 'sessions#create'
     get '/me',     to: 'sessions#me'
+    delete '/logout', to: 'sessions#logout'
+    post '/refresh_token', to: 'tokens#refresh'
     get 'dashboard/summary', to: 'dashboard#summary'
 
     resources :users, only: [:index, :update]

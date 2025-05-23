@@ -4,14 +4,17 @@
 ## 🧩 概要
 
 TaskApp4 は、Rails + React で構築された業務タスク＆メモ管理アプリです。  
-JWT認証ログインを採用し、企業・カテゴリ別にタスクやメモを整理できます。  
+ログインはJWT + Cookie構成で、セッション管理も堅牢な実装としています。
+企業・カテゴリ別にタスクやメモを整理できます。  
 SPA構成のため、快適な操作感でWebとモバイル両対応のモダンなUIを実現しています。
 
 ---
 
 ## 🚀 主な機能
 
-- ✅ **ログイン**
+-  **ログイン**
+  - JWT + Refreshトークン + Cookieによるセキュアな認証構成。
+  - アクセストークンは自動更新され、再ログイン不要のUXを実現。
 - ✅ **タスク管理**
   - タスクの一覧表示・絞り込み（企業／カテゴリ／ステータス）
   - タスクの登録・編集・完了チェック・削除（削除時はモーダル確認あり）
@@ -52,14 +55,23 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 ---
 
 ## 🔐 認証仕様（JWT）
-  - ログインは `/login` にて **メールアドレス + パスワード** をPOST
-  - 成功すると JWT アクセストークン + Refreshトークンを `HttpOnly Cookie` に保存（予定）
-  - トークンは API リクエストの `Authorization: Bearer xxx` で送信（将来的にCookieベースへ移行）
-  - セッション確認用に `/api/me` エンドポイントあり
-  - ログアウト時は Cookie削除によりログアウト状態に
 
-- トークンは API リクエストの `Authorization: Bearer xxx` で送信
-- セッション確認用に `/api/me` エンドポイントあり
+- ログインは `/login` にて **メールアドレス + パスワード** を POST
+- 成功すると JWTアクセストークン + Refreshトークン が **HttpOnly Cookie** に自動保存される
+- アクセストークンは Cookie でAPIに自動送信される（`Authorization` ヘッダー不要）
+- セッション確認用エンドポイント：`/api/me`
+- トークン期限切れの場合、`/api/refresh_token` によりリフレッシュ処理が行われ、自動再認証される
+- ログアウト時はサーバー側で Cookie を削除
+
+---
+
+### 🔐 ログイン・ユーザー状態管理（2025年5月以降構成）
+
+- JWTとリフレッシュトークンは **HttpOnly Cookie** で管理（`localStorage`は未使用）
+- App初回読み込み時に `/api/me` を叩き、ログイン状態を確認
+- アクセストークン失効時は `/api/refresh_token` による自動リトライで再認証
+- 認証状態は `App.jsx` の内部ステート `user` で一元管理
+- APIから取得される全データ（タスク、メモなど）には `user_id` が紐づいており、ログインユーザーのデータのみ取得・表示される
 
 ---
 
@@ -69,7 +81,7 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 |----------------|-----------------------------------------|
 | フロントエンド | React 18, React Router v6, TailwindCSS |
 | バックエンド   | Ruby on Rails 7（非APIモード）          |
-| 認証           | JWT（PIN認証ベース）                   |
+| 認証           | - 認証：JWT + HttpOnly Cookie + Refreshトークン（アクセストークン自動更新構成）                |
 | データベース   | PostgreSQL                              |
 | その他         | Webpacker構成（packs/components分割）   |
 
@@ -100,12 +112,6 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 - Reactコンポーネントは `app/javascript/components/` に保存
 - TailwindCSSは PostCSS7 対応、`application.js` で読み込み
 - ToastContext / ModalContext による共通UI制御を導入（タスク・メモの削除等に活用）
-
-### 🔐 ログイン・ユーザー状態管理
-- JWTはログイン成功時に `localStorage.token` に保存
-- ユーザー情報は `localStorage.user` にJSONで保存し、`App.jsx` 内で `setUser()`
-- App初回で `/api/me` を叩いてログイン状態確認
-- 各データには `user_id` を保持、API側でもログインユーザーに限定したデータのみ返却
 
 ### 👤 管理者画面とユーザー操作
 - `is_admin` は主に1ユーザー（チェック切替ではなく固定）
@@ -142,12 +148,12 @@ SPA構成のため、快適な操作感でWebとモバイル両対応のモダ�
 
 ## 🧪 今後の拡張案（予定）
 
-- トークンの有効期限と再ログイン誘導
 - WBS構造によるタスク進捗管理
 - TipTapの表対応、メモのファイル添付（S3を想定）
 - Renderの有料プラン（Starter）を想定したデプロイ予定
   - S3などの外部ストレージと併用し、ストレージ制限に配慮
-  - 無料プランのsleep回避には、Renderの[cron job]機能や、無料のpingサービス（UptimeRobotなど）を使い回避
+  - Render sleep回避には、Renderの[cron job]機能や、無料のpingサービス（UptimeRobotなど）を使い回避
+- 今後APIサーバーとReactフロントを別ドメインにするときは credentials: 'include' 設定
 
 ---
 

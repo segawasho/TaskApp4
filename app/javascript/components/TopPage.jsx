@@ -17,8 +17,8 @@ const TopPage = ({ user }) => {
   const { showToast } = useToast();
   const { openModal, closeModal } = useModal();
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await logoutUser(); // ← api.jsのfetch('/api/logout') を叩く
     showToast('ログアウトしました', 'success');
     navigate('/login');
   };

@@ -2,19 +2,26 @@ ja:
   activerecord:
     models:
       memo: メモ
+      user: ユーザー
     attributes:
       memo:
         title: タイトル
         body: 本文
         memo_date: 日付
         company: 企業
+      user:
+        email: メールアドレス
+        name: 名前
+        password: パスワード
+        role: 職種
+        custom_role_description: その他の職種内容
   errors:
     models:
       memo:
         attributes:
           company:
             required: を入力してください
-  errors:
     messages:
       blank: を入力してください
       too_long: は%{count}文字以内で入力してください
+      taken: はすでに登録されています
