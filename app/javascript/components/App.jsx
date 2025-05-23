@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import SignupForm from './SignupForm';
 import Login from './Login';
 import TopPage from './TopPage';
 import AdminUserList from './AdminUserList';
@@ -20,23 +21,32 @@ const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error('ユーザー復元失敗', e);
+        }
+      }
+
       const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        console.warn('トークン無効または期限切れ');
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('user');
+        setUser(null); // 明示的にnullに
+      }
+
       setLoading(false);
     };
+
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('current_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('ユーザー情報の復元に失敗しました', e);
-      }
-    }
-  }, []);
+
 
 
   if (loading) return <p>Loading...</p>; // 初回読み込み防止
@@ -48,6 +58,7 @@ const App = () => {
           <>
             <Routes>
               <Route path="/login" element={<Login onLogin={setUser} />} />
+              <Route path="/signup" element={<SignupForm onSignup={setUser} />} />
               {user ? (
                 <>
                   <Route path="/" element={<TopPage user={user} />} />

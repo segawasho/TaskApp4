@@ -21,8 +21,8 @@ const Login = ({ onLogin }) => {
       if (!res.ok) throw new Error('ログイン失敗');
       const data = await res.json();
 
-      localStorage.setItem('jwt', data.token);
-      localStorage.setItem('current_user', JSON.stringify(data.user));
+      localStorage.setItem('jwt', data.jwt);
+      localStorage.setItem('user', JSON.stringify(data.user));
       onLogin(data.user);
       navigate('/');
     } catch (err) {

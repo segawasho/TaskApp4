@@ -9,6 +9,9 @@ Rails.application.routes.draw do
 
   # APIエンドポイント
   namespace :api do
+    get 'industries/index'
+    get 'roles/index'
+    post '/signup', to: 'registrations#create'
     post '/login', to: 'sessions#create'
     get '/me',     to: 'sessions#me'
     get 'dashboard/summary', to: 'dashboard#summary'
@@ -26,5 +29,8 @@ Rails.application.routes.draw do
     resources :companies, only: [:index, :create, :update, :destroy]
     resources :categories, only: [:index, :create, :update, :destroy]
     resources :statuses, only: [:index, :create, :update, :destroy]
+
+    resources :roles, only: [:index]
+    resources :industries, only: [:index]
   end
 end

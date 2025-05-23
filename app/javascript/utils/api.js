@@ -1,3 +1,22 @@
+// 任意のPOSTリクエスト（認証なし）を送る共通関数
+export const apiPost = async (url, payload) => {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw data;
+  }
+
+  return await res.json();
+};
+
+
 export const loginUser = async (email, password) => {
   try {
     const res = await fetch('/api/login', {
@@ -25,7 +44,7 @@ export const authFetch = async (url, options = {}) => {
   const token = localStorage.getItem('jwt');
   const headers = {
     ...(options.headers || {}),
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${jwt}`,
     'Content-Type': 'application/json',
   };
   return fetch(url, { ...options, headers });
@@ -55,7 +74,7 @@ export const getCurrentUser = async () => {
 // ログアウト処理（共通化）
 export const logoutUser = () => {
   localStorage.removeItem('jwt');
-  localStorage.removeItem('current_user');
+  localStorage.removeItem('user');
 };
 
 
@@ -65,7 +84,7 @@ export const fetchUsers = async () => {
   const res = await fetch('/api/users', {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${jwt}`,
     },
   });
 
@@ -84,7 +103,7 @@ export const updateUserPassword = async (id, password) => {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ user: { password } }),
   });
@@ -100,7 +119,7 @@ export const updatePassword = async (newPassword) => {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ password: newPassword }),
   });

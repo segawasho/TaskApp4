@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
+ActiveRecord::Schema[7.0].define(version: 2025_05_22_210045) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -34,6 +34,14 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
     t.index ["user_id"], name: "index_companies_on_user_id"
   end
 
+  create_table "industries", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.index ["sort_order"], name: "index_industries_on_sort_order"
+  end
+
   create_table "memos", force: :cascade do |t|
     t.bigint "company_id", null: false
     t.string "title"
@@ -55,6 +63,24 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
     t.bigint "user_id", null: false
     t.index ["task_id"], name: "index_progress_comments_on_task_id"
     t.index ["user_id"], name: "index_progress_comments_on_user_id"
+  end
+
+  create_table "role_categories", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.index ["sort_order"], name: "index_role_categories_on_sort_order"
+  end
+
+  create_table "roles", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "role_category_id"
+    t.integer "sort_order", default: 0, null: false
+    t.index ["role_category_id"], name: "index_roles_on_role_category_id"
+    t.index ["sort_order"], name: "index_roles_on_sort_order"
   end
 
   create_table "statuses", force: :cascade do |t|
@@ -98,6 +124,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
     t.boolean "has_full_package_plan", default: false
     t.boolean "has_annual_plan", default: false
     t.boolean "is_invited_user", default: false
+    t.bigint "role_id", null: false
+    t.bigint "industry_id"
+    t.string "custom_role_description"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -107,6 +136,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_05_21_220436) do
   add_foreign_key "memos", "users"
   add_foreign_key "progress_comments", "tasks"
   add_foreign_key "progress_comments", "users"
+  add_foreign_key "roles", "role_categories"
   add_foreign_key "statuses", "users"
   add_foreign_key "tasks", "users"
 end
