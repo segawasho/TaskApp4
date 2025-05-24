@@ -52,9 +52,8 @@ const SignupForm = ({ onSignup }) => {
     setError('');
     try {
       const res = await apiPost('/api/signup', { user: form });
-      localStorage.setItem('jwt', res.jwt);
-      localStorage.setItem('user', JSON.stringify(res.user));
       showToast('登録に成功しました');
+      onSignup(res.user);  // ← App.jsx の setUser に反映
       navigate('/');
     } catch (err) {
       setError(err.errors?.[0] || '登録に失敗しました');

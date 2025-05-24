@@ -117,8 +117,6 @@ const TopPage = ({ user }) => {
 
           {/* ようこそ表示 */}
           {user?.name && (
-            // ログイン後すぐに localStorage に書き込んだ user データが、App.jsx の useEffect → setUser() に反映されるまでに 1フレーム遅れる
-            // ログイン直後に TopPage.jsx に遷移しても user.name が一瞬 undefined になる現象がある。
             <p className="text-center text-gray-600 mb-4">
               ログイン中：{user.name}
             </p>

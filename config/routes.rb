@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     post '/signup', to: 'registrations#create'
     post '/login', to: 'sessions#create'
     get '/me',     to: 'sessions#me'
+    delete '/logout', to: 'sessions#destroy'
     get 'dashboard/summary', to: 'dashboard#summary'
 
     resources :users, only: [:index, :update]

@@ -5,8 +5,16 @@ class Api::SessionsController < ApplicationController
     user = User.find_by(email: params[:email])
     if user&.authenticate(params[:password])
       token = JsonWebToken.encode(user_id: user.id)
+
+      cookies.encrypted[:jwt] = {
+        value: token,
+        httponly: true,
+        secure: Rails.env.production?, # 本番環境でのみhttps
+        same_site: :lax,
+        expires: 15.minutes.from_now
+      }
+
       render json: {
-        jwt: token,
         user: {
           id: user.id,
           email: user.email,
@@ -21,7 +29,7 @@ class Api::SessionsController < ApplicationController
 
   def me
     header = request.headers['Authorization']
-    token = header&.split(' ')&.last
+    token = cookies.encrypted[:jwt]
     decoded = JsonWebToken.decode(token)
 
     if decoded && (user = User.find_by(id: decoded[:user_id]))
@@ -34,5 +42,10 @@ class Api::SessionsController < ApplicationController
     else
       render json: { error: '無効なトークン' }, status: :unauthorized
     end
+  end
+
+  def destroy
+    cookies.delete(:jwt)
+    render json: { message: 'ログアウトしました' }, status: :ok
   end
 end

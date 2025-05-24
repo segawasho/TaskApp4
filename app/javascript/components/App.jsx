@@ -21,30 +21,19 @@ const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-        } catch (e) {
-          console.error('ユーザー復元失敗', e);
-        }
-      }
-
       const currentUser = await getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
       } else {
         console.warn('トークン無効または期限切れ');
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('user');
         setUser(null); // 明示的にnullに
       }
-
       setLoading(false);
     };
 
     fetchUser();
   }, []);
+
 
 
 

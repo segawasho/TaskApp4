@@ -5,7 +5,16 @@ class Api::RegistrationsController < ApplicationController
     user = User.new(user_params)
     if user.save
       token = JsonWebToken.encode(user_id: user.id)
-      render json: { jwt:, user: user.slice(:id, :email, :name) }, status: :created
+
+      cookies.encrypted[:jwt] = {
+        value: token,
+        httponly: true,
+        secure: Rails.env.production?,
+        same_site: :lax,
+        expires: 15.minutes.from_now
+      }
+
+      render json: { user: user.slice(:id, :email, :name) }, status: :created
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end

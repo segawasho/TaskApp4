@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../utils/api';
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -8,27 +9,16 @@ const Login = ({ onLogin }) => {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async () => {
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
 
-      if (!res.ok) throw new Error('ログイン失敗');
-      const data = await res.json();
-
-      localStorage.setItem('jwt', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      onLogin(data.user);
-      navigate('/');
-    } catch (err) {
-      setError('ログインに失敗しました');
-    }
-  };
+    const handleLogin = async () => {
+      const user = await loginUser(email, password);
+      if (user) {
+        onLogin(user); // App.jsx の setUser に反映
+        navigate('/');
+      } else {
+        setError('ログインに失敗しました');
+      }
+    };
 
 
   return (

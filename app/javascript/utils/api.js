@@ -1,10 +1,11 @@
-// 任意のPOSTリクエスト（認証なし）を送る共通関数
+// 認証不要なPOST（例: 新規登録・ログイン）
 export const apiPost = async (url, payload) => {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include', // ← Cookie送信
     body: JSON.stringify(payload),
   });
 
@@ -16,7 +17,19 @@ export const apiPost = async (url, payload) => {
   return await res.json();
 };
 
+// 認証付きfetch（Cookie送信のみで済む）
+export const authFetch = async (url, options = {}) => {
+  return fetch(url, {
+    ...options,
+    credentials: 'include', // ← これだけでOK
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+};
 
+// ログイン（トークンはCookieにHttpOnlyで返ってくる）
 export const loginUser = async (email, password) => {
   try {
     const res = await fetch('/api/login', {
@@ -24,14 +37,12 @@ export const loginUser = async (email, password) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) throw new Error('ログイン失敗');
-
     const data = await res.json();
-    localStorage.setItem('jwt', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
     return data.user;
   } catch (err) {
     console.error(err);
@@ -39,71 +50,46 @@ export const loginUser = async (email, password) => {
   }
 };
 
-// 認証付きfetch
-export const authFetch = async (url, options = {}) => {
-  const token = localStorage.getItem('jwt');
-  const headers = {
-    ...(options.headers || {}),
-    Authorization: `Bearer ${jwt}`,
-    'Content-Type': 'application/json',
-  };
-  return fetch(url, { ...options, headers });
+// ログアウト（Cookie削除）
+export const logoutUser = async () => {
+  await fetch('/api/logout', {
+    method: 'DELETE',
+    credentials: 'include',
+  });
 };
 
-  // トークンの保存と取得
-  // ログイン時に取得したJWTトークンをlocalStorageに保存し、トップページ読み込み時にそれを取得してログイン状態を確認する
+// 現在のユーザーを取得
 export const getCurrentUser = async () => {
-  const token = localStorage.getItem('jwt');
-  if (!token) return null;
-
   try {
     const res = await fetch('/api/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      method: 'GET',
+      credentials: 'include',
     });
     if (!res.ok) throw new Error('トークン無効');
-    const user = await res.json();
-    return user;
+    return await res.json();
   } catch (err) {
     console.error(err);
     return null;
   }
 };
 
-// ログアウト処理（共通化）
-export const logoutUser = () => {
-  localStorage.removeItem('jwt');
-  localStorage.removeItem('user');
-};
-
-
 // ユーザー一覧取得（管理者用）
 export const fetchUsers = async () => {
-  const token = localStorage.getItem('jwt');
   const res = await fetch('/api/users', {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${jwt}`,
-    },
+    method: 'GET',
+    credentials: 'include',
   });
-
-  if (!res.ok) {
-    throw new Error('ユーザー一覧の取得に失敗しました');
-  }
-
+  if (!res.ok) throw new Error('ユーザー一覧の取得に失敗しました');
   return await res.json();
 };
 
-
-// 管理側でのパスワード更新
+// 管理者：ユーザーパスワード更新
 export const updateUserPassword = async (id, password) => {
-  const token = localStorage.getItem('jwt');
   const res = await fetch(`/api/users/${id}`, {
     method: 'PUT',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ user: { password } }),
   });
@@ -111,22 +97,17 @@ export const updateUserPassword = async (id, password) => {
   if (!res.ok) throw new Error('パスワード更新失敗');
 };
 
-
-// User 自身のパスワード変更
+// ユーザー本人のパスワード更新
 export const updatePassword = async (newPassword) => {
-  const token = localStorage.getItem('jwt');
   const res = await fetch('/api/password', {
     method: 'PATCH',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({ password: newPassword }),
   });
 
-  if (!res.ok) {
-    throw new Error('パスワード変更失敗');
-  }
-
+  if (!res.ok) throw new Error('パスワード変更失敗');
   return await res.json();
 };
