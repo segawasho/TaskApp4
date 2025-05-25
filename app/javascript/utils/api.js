@@ -19,15 +19,18 @@ export const apiPost = async (url, payload) => {
 
 // 認証付きfetch（Cookie送信のみで済む）
 export const authFetch = async (url, options = {}) => {
-  return fetch(url, {
+  const response = await fetch(url, {
+    credentials: 'include',
     ...options,
-    credentials: 'include', // ← これだけでOK
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
   });
+
+  if (response.status === 401) {
+    window.location.href = '/login'; // トークン期限切れなどで未認証の場合
+  }
+
+  return response;
 };
+
 
 // ログイン（トークンはCookieにHttpOnlyで返ってくる）
 export const loginUser = async (email, password) => {
@@ -83,31 +86,20 @@ export const fetchUsers = async () => {
   return await res.json();
 };
 
-// 管理者：ユーザーパスワード更新
-export const updateUserPassword = async (id, password) => {
-  const res = await fetch(`/api/users/${id}`, {
-    method: 'PUT',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ user: { password } }),
-  });
-
-  if (!res.ok) throw new Error('パスワード更新失敗');
-};
-
-// ユーザー本人のパスワード更新
-export const updatePassword = async (newPassword) => {
+// ユーザーパスワード更新
+export const updatePassword = async (password, passwordConfirmation) => {
   const res = await fetch('/api/password', {
     method: 'PATCH',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ password: newPassword }),
+    body: JSON.stringify({
+      password,
+      password_confirmation: passwordConfirmation,
+    }),
   });
 
-  if (!res.ok) throw new Error('パスワード変更失敗');
+  if (!res.ok) throw new Error('パスワード更新失敗');
   return await res.json();
 };

@@ -5,11 +5,20 @@ import { useToast } from '../contexts/ToastContext';
 
 const PasswordSettings = ({ user }) => {
   const [newPassword, setNewPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const { showToast } = useToast();
 
   const handleSubmit = async () => {
+    if (newPassword !== passwordConfirmation) {
+      showToast('パスワードが一致しません', 'error');
+      return;
+    }
+
     try {
-      await updatePassword(newPassword);
+      await updatePassword({
+        password: newPassword,
+        password_confirmation: passwordConfirmation,
+      });
       showToast('パスワードを変更しました', 'success');
       setNewPassword('');
     } catch (err) {
@@ -23,10 +32,17 @@ const PasswordSettings = ({ user }) => {
         <h2 className="text-2xl font-bold mb-4">パスワード変更</h2>
         <input
           type="password"
-          placeholder="新しいパスワード（8文字以上推奨）"
+          placeholder="新しいパスワード"
           className="border px-3 py-2 w-full mb-4"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="パスワード確認"
+          className="border px-3 py-2 w-full mb-4"
+          value={passwordConfirmation}
+          onChange={(e) => setPasswordConfirmation(e.target.value)}
         />
 
         <button

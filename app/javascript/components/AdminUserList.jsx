@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsers } from '../utils/api';
+import { fetchUsers, authFetch } from '../utils/api';
 import Modal from './Modal';
 import PageLayout from './PageLayout';
 import { useToast } from '../contexts/ToastContext';
@@ -89,13 +89,8 @@ const AdminUserList = () => {
     }
 
     try {
-      const token = localStorage.getItem('jwt');
-      const res = await fetch(`/api/users/${user.id}`, {
+      const res = await authFetch(`/api/users/${user.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({ user: updated }),
       });
 

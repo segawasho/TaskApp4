@@ -56,7 +56,8 @@ const SignupForm = ({ onSignup }) => {
       onSignup(res.user);  // ← App.jsx の setUser に反映
       navigate('/');
     } catch (err) {
-      setError(err.errors?.[0] || '登録に失敗しました');
+      const message = err.errors?.[0] || err.message || '登録に失敗しました';
+      setError(message);
       showToast('登録に失敗しました', 'error');
     }
   };

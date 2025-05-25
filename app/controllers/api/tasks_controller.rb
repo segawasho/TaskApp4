@@ -6,7 +6,8 @@ class Api::TasksController < ApplicationController
   # 通常の画面操作（フォーム送信とか）はprotect_from_forgeryが守ってくれる
   # APIだけ特別に CSRFチェックを無効にしてあげる感じ
   # セキュリティ的にも、API用なら大丈夫！（これが普通の設定）
-  before_action :authorize_request
+  before_action :authenticate_user!
+
 
 
   def index

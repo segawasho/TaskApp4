@@ -1,6 +1,6 @@
 class Api::CategoriesController < ApplicationController
   protect_from_forgery with: :null_session
-  before_action :authorize_request
+  before_action :authenticate_user!
 
   def index
     render json: current_user.categories
